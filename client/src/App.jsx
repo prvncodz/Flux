@@ -31,7 +31,6 @@ function App() {
             } catch (error) {
                 setUser({});
                 setIsUserLogged(false);
-                console.log(error);
                 try {
                     if (error.status === 500) {
                         const res = await axios.post("/user/refresh-tokens");

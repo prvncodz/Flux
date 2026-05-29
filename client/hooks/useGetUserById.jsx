@@ -11,7 +11,6 @@ const useGetUserById = (userId) => {
   const [watchHistory, setWatchHistory] = useState([]);
 
   if (!userId) {
-    console.log(userId);
     return;
   }
 

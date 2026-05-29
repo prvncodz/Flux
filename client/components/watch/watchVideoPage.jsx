@@ -13,6 +13,7 @@ import LikeButton from "../home/likeComponent/likeButton.jsx";
 import VideoPlayer from "../home/videofeed/VideoPlayer.jsx";
 import SignInBanner from "../signinInstructPopup.jsx";
 import useUserStore from "../../stores/user.store.js";
+import useTab from "../../stores/tab.store.js";
 
 export default function WatchVideoPage() {
     const location = useLocation();
