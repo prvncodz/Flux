@@ -47,7 +47,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
         throw new ApiError(-501, "error finding tweets by this user");
     }
     const promises = allTweets.map(async (tweet) => {
-        const obj = tweet.toObject();
+        const obj = tweet;
         obj.isLiked = !!(await Like.exists({
             tweet: tweet?._id,
             likedBy: userId,
@@ -87,7 +87,7 @@ const updateTweet = asyncHandler(async (req, res) => {
                 content: content,
             },
         },
-        { returnDocument:"after" }
+        { returnDocument: "after" }
     );
     return res
         .status(200)
@@ -138,7 +138,7 @@ const getAllTweets = asyncHandler(async (req, res) => {
     }
 
     const promises = allTweets.map(async (tweet) => {
-        const obj = tweet.toObject();
+        const obj = tweet;
         obj.isLiked = userId
             ? !!(await Like.exists({ tweet: tweet?._id, likedBy: userId }).lean())
             : false;
