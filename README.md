@@ -1,42 +1,107 @@
 # Flux
 
-<img width="1920" height="1080" alt="screenshot-2026-05-14_13-23-53" src="https://github.com/user-attachments/assets/88afdf3a-4244-4d6c-9a67-038aa587c8c5" />
+> A social media platform built for tech enthusiasts.
 
 
-## Project Description
-Flux is a social media platform designed specifically for tech enthusiasts. It serves as a hub for sharing knowledge, experiences, and ideas, fostering a community where individuals can connect and engage on various technology-related topics.
-
-This project marks a significant milestone as it is the first MERN (MongoDB, Express, React, Node.js) project that has been manually coded 80%. This hands-on approach to development allowed for a deep understanding of the MERN stack and the opportunity to customize functionalities to better suit the needs of the user base.
-
-
-## Technologies Used
-- **Frontend:** React JS, Tailwind CSS, Motion, Zustand(state management)
-- **Backend:** Node.js, Express, Mongoose
-- **Database:** MongoDB
-
-## Features
-- User registration and authentication
-- Profile creation and customization
-- Twitter like posting, commenting, and liking functionalities
-- Playlist creation
-- User dashboard 
-- Liked videos and watch history
-
-## Getting Started
-To get a copy of the project up and running on your local machine for development and testing purposes, follow these instructions:
-
-1. Clone the repository: `git clone https://github.com/Prvncodz/Flux.git`
-2. Navigate to the project directory: `cd Flux`
-3. Install dependencies: `npm install`
-4. Navigate to the client directory:`cd client`
-5. Install dependencies: `npm install`
-6. use your own .env file just like .env.sample file
-7. Start the server: `npm run dev`
-
-
-## License
-This project is licensed under the MIT License 
+![Flux Interface](./client/components/assets/interface.png)
 
 ---
 
-Feel free to explore and contribute!
+## What is Flux?
+
+Flux is a full-stack MERN social platform where tech people share ideas, post content, and engage with a community — think Twitter meets a tech blog. Built end-to-end with a deep focus on understanding the full MERN stack.
+
+---
+
+## Features
+
+- Auth — register, login, JWT-based sessions
+- Posts — create, like, comment (Twitter-style)
+- Profiles — customizable user profiles
+- Playlists — organize and save content
+- Dashboard — personal activity overview
+- Watch History & Liked Videos
+
+---
+
+## Tech Stack
+
+| Layer    | Tech                                |
+|----------|-------------------------------------|
+| Frontend |React, Zustand, Motion, React Router |
+| Backend  | Node.js, Express                    |
+| Database | MongoDB (Mongoose)                  |
+
+---
+
+## Project Structure
+
+```
+Flux/
+├── src/        # Express backend
+└── client/     # React frontend
+```
+
+---
+
+## Getting Started
+
+### 1. Clone & install backend
+
+```bash
+git clone https://github.com/Prvncodz/Flux.git
+cd Flux
+npm install
+```
+
+### 2. Setup environment
+
+```bash
+cp .env.sample .env
+# Fill in your values
+```
+
+```env
+PORT=8000
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+NODE_ENV=development
+```
+
+### 3. Install & run frontend
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+### 4. Run backend
+
+```bash
+# From root
+npm run dev
+```
+
+---
+
+## Scripts
+
+```bash
+# Backend
+npm run dev       # Development
+npm start         # Production
+
+# Frontend (inside /client)
+npm run dev       # Development
+npm run build     # Production build
+```
+
+---
+
+## License
+
+MIT
