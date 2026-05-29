@@ -13,12 +13,12 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     const existingSubscribtion = await Subscription.findOne({
         channel: channelId,
         subscriber: req.user._id,
-    });
+    }).lean();
 
     if (existingSubscribtion) {
         const unsubscribed = await Subscription.findByIdAndDelete(
             existingSubscribtion._id
-        );
+        ).lean();
 
         if (!unsubscribed) {
             throw new ApiError(500, "unable to unsubscribe the channel");
@@ -49,7 +49,6 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         );
 });
 
-// controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
     if (!isValidObjectId(channelId)) {
@@ -57,7 +56,8 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     }
     const allSubscribedUsersDocs = await Subscription.find({
         channel: channelId,
-    });
+    }).lean();
+
     const allSubscribedUsers = allSubscribedUsersDocs.map(
         (Subscription) => Subscription.subscriber
     );
@@ -82,7 +82,8 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     }
     const allSubscribedChannelDocs = await Subscription.find({
         subscriber: subscriberId,
-    });
+    }).lean();
+
     const allSubscribedChannels = allSubscribedChannelDocs.map(
         (Subscription) => Subscription.channel
     );

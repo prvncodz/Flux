@@ -13,7 +13,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         throw new ApiError(400, "This video is invalid or removed by the user");
     }
     if (!videoId) {
-        throw new ApiError(404, "this video id is undefined ");
+        throw new ApiError(400, "this video id is undefined ");
     }
     const { page = 1, limit = 10 } = req.query;
 
@@ -22,17 +22,17 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const skipNum = (pageNum - 1) * limitNum;
 
     if (isNaN(pageNum) || pageNum < 1) {
-        throw new ApiError(403, "page number is invalid");
+        throw new ApiError(400, "page number is invalid");
     }
     if (isNaN(limitNum) || limitNum < 1) {
-        throw new ApiError(403, "page number is invalid");
+        throw new ApiError(400, "page number is invalid");
     }
     const comments = await Comment.find({ video: videoId })
         .skip(skipNum)
         .limit(limitNum);
 
     if (!comments) {
-        throw new ApiError(501, "Unable to fetch Comments");
+        throw new ApiError(500, "Unable to fetch Comments");
     }
 
     if (!userId) {
@@ -50,7 +50,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const promises = comments.map(async (comment) => {
         const obj = comment.toObject();
         obj.isLiked = userId
-            ? !!(await Like.exists({ comment: obj._id, likedBy: userId }))
+            ? !!(await Like.exists({ comment: obj._id, likedBy: userId }).lean())
             : false;
         return obj;
     });
@@ -75,7 +75,7 @@ const getTweetComments = asyncHandler(async (req, res) => {
         throw new ApiError(400, "This tweet is invalid or removed by the user");
     }
     if (!tweetId) {
-        throw new ApiError(404, "undefined tweet id");
+        throw new ApiError(400, "undefined tweet id");
     }
 
     const { page = 1, limit = 10 } = req.query;
@@ -85,17 +85,17 @@ const getTweetComments = asyncHandler(async (req, res) => {
     const skipNum = (pageNum - 1) * limitNum;
 
     if (isNaN(pageNum) || pageNum < 1) {
-        throw new ApiError(403, "page number is invalid");
+        throw new ApiError(400, "page number is invalid");
     }
     if (isNaN(limitNum) || limitNum < 1) {
-        throw new ApiError(403, "limit number is invalid");
+        throw new ApiError(400, "limit number is invalid");
     }
     const comments = await Comment.find({ tweet: tweetId })
         .skip(skipNum)
         .limit(limitNum);
 
     if (!comments) {
-        throw new ApiError(501, "Unable to fetch Comments");
+        throw new ApiError(500, "Unable to fetch Comments");
     }
     if (!userId) {
         return res
@@ -111,7 +111,7 @@ const getTweetComments = asyncHandler(async (req, res) => {
     const promises = comments.map(async (comment) => {
         const obj = comment.toObject();
         obj.isLiked = userId
-            ? !!(await Like.exists({ comment: obj._id, likedBy: userId }))
+            ? !!(await Like.exists({ comment: obj._id, likedBy: userId }).lean())
             : false;
         return obj;
     });
@@ -146,17 +146,18 @@ const getCommentComments = asyncHandler(async (req, res) => {
     const skipNum = (pageNum - 1) * limitNum;
 
     if (isNaN(pageNum) || pageNum < 1) {
-        throw new ApiError(403, "page number is invalid");
+        throw new ApiError(400, "page number is invalid");
     }
     if (isNaN(limitNum) || limitNum < 1) {
-        throw new ApiError(403, "limit number is invalid");
+        throw new ApiError(400, "limit number is invalid");
     }
     const comments = await Comment.find({ comment: commentId })
         .skip(skipNum)
-        .limit(limitNum);
+        .limit(limitNum)
+        .lean();
 
     if (!comments) {
-        throw new ApiError(501, "Unable to fetch Comments");
+        throw new ApiError(500, "Unable to fetch Comments");
     }
     if (!userId) {
         return res
@@ -173,7 +174,7 @@ const getCommentComments = asyncHandler(async (req, res) => {
     const promises = comments.map(async (comment) => {
         const obj = comment.toObject();
         obj.isLiked = userId
-            ? !!(await Like.exists({ comment: obj._id, likedBy: userId }))
+            ? !!(await Like.exists({ comment: obj._id, likedBy: userId }).lean())
             : false;
         return obj;
     });
@@ -209,7 +210,7 @@ const addCommentOnVideo = asyncHandler(async (req, res) => {
         owner: req.user?._id,
     });
     if (!addedComment) {
-        throw new ApiError(501, "Unable to add comment");
+        throw new ApiError(500, "Unable to add comment");
     }
     return res
         .status(200)
@@ -237,7 +238,7 @@ const addCommentOnTweet = asyncHandler(async (req, res) => {
         owner: req.user?._id,
     });
     if (!addedComment) {
-        throw new ApiError(501, "Unable to add comment");
+        throw new ApiError(500, "Unable to add comment");
     }
     return res
         .status(200)
@@ -265,7 +266,7 @@ const addCommentOnComment = asyncHandler(async (req, res) => {
         owner: req.user?._id,
     });
     if (!addedComment) {
-        throw new ApiError(501, "Unable to add comment");
+        throw new ApiError(500, "Unable to add comment");
     }
     return res
         .status(200)
@@ -307,7 +308,7 @@ const updateComment = asyncHandler(async (req, res) => {
 
 const deleteComment = asyncHandler(async (req, res) => {
     const { commentId } = req.params;
-    const deletedComment = await Comment.findByIdAndDelete(commentId);
+    const deletedComment = await Comment.findByIdAndDelete(commentId).lean();
     if (!deletedComment) {
         throw new ApiError(500, "Unable to delete your comment");
     }

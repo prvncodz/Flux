@@ -40,6 +40,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
     const allTweets = await Tweet.find({ owner: userId })
         .skip(skipNum)
         .limit(limitNum)
+        .lean()
         .populate("owner", "avatar fullName userName");
 
     if (!allTweets) {
@@ -50,7 +51,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
         obj.isLiked = !!(await Like.exists({
             tweet: tweet?._id,
             likedBy: userId,
-        }));
+        }).lean());
         return obj;
     });
 
@@ -86,7 +87,7 @@ const updateTweet = asyncHandler(async (req, res) => {
                 content: content,
             },
         },
-        { new: true }
+        { returnDocument:"after" }
     );
     return res
         .status(200)
@@ -129,6 +130,7 @@ const getAllTweets = asyncHandler(async (req, res) => {
     const allTweets = await Tweet.find(filter)
         .skip(skipNum)
         .limit(limitNum)
+        .lean()
         .populate("owner", "avatar fullName userName");
 
     if (!allTweets) {
@@ -138,7 +140,7 @@ const getAllTweets = asyncHandler(async (req, res) => {
     const promises = allTweets.map(async (tweet) => {
         const obj = tweet.toObject();
         obj.isLiked = userId
-            ? !!(await Like.exists({ tweet: tweet?._id, likedBy: userId }))
+            ? !!(await Like.exists({ tweet: tweet?._id, likedBy: userId }).lean())
             : false;
         return obj;
     });

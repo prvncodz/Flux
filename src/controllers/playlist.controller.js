@@ -48,6 +48,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     const AllPlaylistsByUser = await Playlist.find({ owner: userId })
         .skip(skipNum)
         .limit(limitNum)
+        .lean()
         .populate("videos", "thumbnail")
         .populate("owner", "avatar fullName userName");
 
@@ -69,9 +70,10 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
 
     if (!isValidObjectId(playlistId)) {
-        throw new ApiError(403, "invlaid id");
+        throw new ApiError(400, "invlaid id");
     }
     const playlist = await Playlist.findById(playlistId)
+        .lean()
         .populate("videos")
         .populate("owner", "avatar fullName userName");
     if (!playlist) {
@@ -85,12 +87,12 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
     if (!isValidObjectId(playlistId)) {
-        throw new ApiError(403, "inavlid id");
+        throw new ApiError(400, "inavlid id");
     }
     const { videoIds } = req.body;
     if (!videoIds) {
         throw new ApiError(
-            403,
+            400,
             "Atleast one video is required to add video to playlist"
         );
     }
@@ -101,12 +103,12 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
                 videos: videoIds,
             },
         },
-        { new: true }
-    );
-    if (!addVideoToPlaylist) {
+        { returnDocument:"after" }
+    ).lean();
+    if (!addedVideoToPlaylist) {
         throw new ApiError("unable to add videos to the playlist");
     }
-    const newPlaylist = await Playlist.findById(playlistId).populate("videos");
+    const newPlaylist = await Playlist.findById(playlistId).lean().populate("videos");
     return res
         .status(200)
         .json(
@@ -131,8 +133,8 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
                 videos: videoId,
             },
         },
-        { new: true }
-    );
+        { returnDocument:"after" }
+    ).lean();
     if (!removeVideo) {
         throw new ApiError(500, "unable to remove this video from playlist");
     }
@@ -153,7 +155,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     if (!isValidObjectId(playlistId)) {
         throw new ApiError(400, "invlaid id");
     }
-    const deletedPlaylist = await Playlist.findByIdAndDelete(playlistId);
+    const deletedPlaylist = await Playlist.findByIdAndDelete(playlistId).lean();
     if (!deletedPlaylist) {
         throw new ApiError(500, "unable to delete palylist");
     }
@@ -180,8 +182,8 @@ const updatePlaylist = asyncHandler(async (req, res) => {
                 description: description ? description : "",
             },
         },
-        { new: true }
-    );
+        { returnDocument: "after"}
+    ).lean();
 
     if (!updatedPlaylist) {
         throw new ApiError(500, "unable to update the playlist");

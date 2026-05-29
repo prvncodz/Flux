@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).lean();
         const accessTokens = await user.generateAccessTokens();
         const refreshTokens = await user.generateRefreshTokens();
 
@@ -29,22 +29,22 @@ const registerUser = asyncHandler(async (req, res) => {
     ) {
         throw new ApiError(400, "All feilds are required");
     }
-    const existsUser = await User.findOne({ userName });
+    const existsUser = await User.findOne({ userName }).lean();
     if (existsUser) {
-        throw new ApiError(402, "user already exists");
+        throw new ApiError(400, "user already exists");
     }
 
     const avatarLocalPath = req.files?.avatar?.[0]?.path;
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
     if (!avatarLocalPath) {
-        throw new ApiError(403, "avatar file path is required to register");
+        throw new ApiError(400, "avatar file path is required to register");
     }
     const avatar = await uploadOnCloud(avatarLocalPath);
 
     const coverImage = await uploadOnCloud(coverImageLocalPath);
     if (!avatar) {
-        throw new ApiError(403, "avatar is required to register");
+        throw new ApiError(400, "avatar is required to register");
     }
 
     const user = await User.create({
@@ -57,13 +57,13 @@ const registerUser = asyncHandler(async (req, res) => {
         },
         coverImage: coverImage
             ? {
-                  public_id: coverImage?.public_id,
-                  url: coverImage?.secure_url,
-              }
+                public_id: coverImage?.public_id,
+                url: coverImage?.secure_url,
+            }
             : {},
         password,
     });
-    const createdUser = await User.findById(user._id).select(
+    const createdUser = await User.findById(user._id).lean().select(
         " -password -refreshTokens"
     );
     if (!createdUser) {
@@ -86,7 +86,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
     const user = await User.findOne({
         $or: [{ userName }, { email }],
-    });
+    }).lean();
 
     if (!user) {
         throw new ApiError(404, "user is not registered yet");
@@ -100,7 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const { accessTokens, refreshTokens } =
         await generateAccessAndRefreshTokens(user._id);
 
-    const loggedUser = await User.findById(user._id).select(
+    const loggedUser = await User.findById(user._id).lean().select(
         "-password -refreshTokens"
     );
 
@@ -124,8 +124,6 @@ const loginUser = asyncHandler(async (req, res) => {
                 200,
                 {
                     user: loggedUser,
-                    accessTokens,
-                    refreshTokens,
                 },
                 "user logged in successfully"
             )
@@ -136,29 +134,19 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                accessTokens: undefined,
+            $unset: {
+                refreshTokens: "",
             },
         },
         {
             new: true,
         }
     );
-    const AtOptions = {
-        httpOnly: true,
-        secure: true,
-        maxAge: 60 * 60 * 1000, //cookie's max age is 1 hour
-    };
-    const RtOptions = {
-        httpOnly: true,
-        secure: true,
-        maxAge: 3 * 24 * 60 * 60 * 1000, //cookie's max age is 3 days
-    };
 
     return res
         .status(200)
-        .clearCookie("accessTokens", AtOptions)
-        .clearCookie("refreshTokens", RtOptions)
+        .clearCookie("accessTokens")
+        .clearCookie("refreshTokens")
         .json(new ApiResponse(200, {}, "user loggedout successfully"));
 });
 
@@ -174,15 +162,12 @@ const refreshAccessTokens = asyncHandler(async (req, res) => {
         incomingRefreshTokens,
         process.env.REFRESH_TOKEN_SECRET
     );
-    const user = await User.findById(decodedToken?._id);
+    const user = await User.findById(decodedToken?._id).lean();
 
     if (!user) {
         throw new ApiError(404, "user not found");
     }
 
-    if (!user.refreshTokens.includes(incomingRefreshTokens)) {
-        throw new ApiError(404, "refresh tokens expired");
-    }
     const { accessTokens, refreshTokens } =
         await generateAccessAndRefreshTokens(user._id);
 
@@ -218,7 +203,7 @@ const changePassword = asyncHandler(async (req, res) => {
             "oldPassword and newPassword is required to make changes"
         );
     }
-    const user = await User.findById(req.user?._id);
+    const user = await User.findById(req.user?._id).lean();
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
     if (!isPasswordCorrect) {
         throw new ApiError(400, "wrong password");
@@ -240,7 +225,7 @@ const currentUser = asyncHandler(async (req, res) => {
 
 const getUserById = asyncHandler(async (req, res) => {
     const { userId } = req.params;
-    const user = await User.findById(userId).select("-password -refreshTokens");
+    const user = await User.findById(userId).lean().select("-password -refreshTokens");
     if (!user) {
         throw new ApiError(500, "Unable to find user");
     }
@@ -268,9 +253,9 @@ const updateAccountInfo = asyncHandler(async (req, res) => {
             $set: UpdatedFields,
         },
         {
-            new: true,
+            returnDocument:"after",
         }
-    ).select("-password");
+    ).lean().select("-password");
     return res
         .status(200)
         .json(new ApiResponse(200, user, "information updated successfully"));
@@ -299,8 +284,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
                 },
             },
         },
-        { new: true }
-    ).select("-password -refreshTokens");
+        { returnDocument:"after" }
+    ).lean().select("-password -refreshTokens");
 
     if (fileToBeDeleted) {
         try {
@@ -340,8 +325,8 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
                 },
             },
         },
-        { new: true }
-    ).select("-password -refreshTokens");
+        { returnDocument:"after" }
+    ).lean().select("-password -refreshTokens");
 
     if (!updateCoverImage) {
         throw new ApiError(404, "Could'nt update the coverImage");

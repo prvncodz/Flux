@@ -8,7 +8,7 @@ import { Video } from "../models/video.model.js";
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
     if (!isValidObjectId(videoId)) {
-        throw new ApiError(403, "object id invalid");
+        throw new ApiError(400, "object id invalid");
     }
     const video = await Video.findById(videoId);
     if (!video.isPublished) {
@@ -21,10 +21,10 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     const existingLike = await Like.findOne({
         video: videoId,
         likedBy: req.user?._id,
-    });
+    }).lean();
 
     if (existingLike) {
-        const disliked = await Like.findByIdAndDelete(existingLike._id);
+        const disliked = await Like.findByIdAndDelete(existingLike._id).lean();
 
         return res
             .status(200)
@@ -55,7 +55,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     const existingLike = await Like.findOne({
         comment: commentId,
         likedBy: req.user?._id,
-    });
+    }).lean();
 
     if (existingLike) {
         const disliked = await Like.findByIdAndDelete(existingLike._id);
@@ -87,10 +87,10 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     const existingLike = await Like.findOne({
         tweet: tweetId,
         likedBy: req.user?._id,
-    });
+    }).lean();
 
     if (existingLike) {
-        const disliked = await Like.findByIdAndDelete(existingLike._id);
+        const disliked = await Like.findByIdAndDelete(existingLike._id).lean();
 
         return res
             .status(200)
@@ -129,6 +129,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         //got the needed videos with the help of this videoIds
         _id: { $in: allLikedVideoIds.map((d) => d.video) },
     })
+        .lean()
         .skip(skipNum)
         .limit(limitNum)
         .populate("owner", "avatar fullName");
@@ -140,7 +141,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     const promises = videos.map(async (video) => {
         const obj = video.toObject();
         obj.isLiked = userId
-            ? !!(await Like.exists({ video: video?._id, likedBy: userId }))
+            ? !!(await Like.exists({ video: video?._id, likedBy: userId }).lean())
             : false;
         return obj;
     });
@@ -168,7 +169,7 @@ const getTweetLikesCount = asyncHandler(async (req, res) => {
     }
     likesCount = await Like.countDocuments({ tweet: tweetId });
     if (!likesCount) {
-        new ApiError(503, "cannot find the like docs for this tweet");
+        new ApiError(500, "cannot find the like docs for this tweet");
     }
     return res
         .status(200)
@@ -190,7 +191,7 @@ const getVideoLikesCount = asyncHandler(async (req, res) => {
 
     likesCount = await Like.countDocuments({ video: videoId });
     if (!likesCount) {
-        new ApiError(503, "cannot find the like docs for this video");
+        new ApiError(500, "cannot find the like docs for this video");
     }
     return res
         .status(200)
@@ -210,7 +211,7 @@ const getCommentLikesCount = asyncHandler(async (req, res) => {
     }
     likesCount = await Like.countDocuments({ comment: commentId });
     if (!likesCount) {
-        new ApiError(503, "cannot find the like docs for this comment");
+        new ApiError(500, "cannot find the like docs for this comment");
     }
     return res
         .status(200)

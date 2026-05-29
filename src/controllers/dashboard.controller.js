@@ -99,7 +99,8 @@ const getChannelVideos = asyncHandler(async (req, res) => {
 
     const allVideos = await Video.find({ owner: req.user._id })
         .skip(skipNum)
-        .limit(limitNum);
+        .limit(limitNum)
+        .lean();
 
     if (!allVideos) {
         throw new ApiError(500, "Unable to fetch all channel videos");

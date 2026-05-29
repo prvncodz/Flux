@@ -75,7 +75,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const promises = videos.map(async (video) => {
         const obj = video.toObject();
         obj.isLiked = userId
-            ? !!(await Like.exists({ video: video?._id, likedBy: userId }))
+            ? !!(await Like.exists({ video: video?._id, likedBy: userId }).lean())
             : false;
         return obj;
     });
@@ -95,7 +95,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
         if (!title) {
             throw new ApiError(
-                403,
+                400,
                 "title field is required to publish a video"
             );
         }
@@ -103,10 +103,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
         const thumbnailFileToPath = req.files?.thumbnail?.[0]?.path;
 
         if (!videoFileToPath) {
-            throw new ApiError(403, "unable to fetch video file path");
+            throw new ApiError(400, "unable to fetch video file path");
         }
         if (!thumbnailFileToPath) {
-            throw new ApiError(403, "unable to fetch thumbnail file path");
+            throw new ApiError(400, "unable to fetch thumbnail file path");
         }
 
         const videoResponse = await uploadOnCloud(videoFileToPath);
@@ -151,7 +151,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
                 )
             );
     } catch (error) {
-        console.log("Error :", error.message);
         throw new ApiError(500, "unable to publish the video");
     }
 });
@@ -162,38 +161,36 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { userId } = req.query;
 
     if (!videoId) {
-        throw new ApiError(403, "video id is invalid");
+        throw new ApiError(400, "video id is invalid");
     }
 
     if (req.user?._id) {
         try {
-            const videoObjectId = new mongoose.Types.ObjectId(videoId);
             await User.findByIdAndUpdate(
                 req.user._id,
                 {
-                    $pull: { watchHistory: videoObjectId },
+                    $pull: { watchHistory: videoId },
                 },
                 {
-                    new: true,
+                    returnDocument: "after",
                 }
-            );
+            ).lean();
             await User.findByIdAndUpdate(
                 req.user._id,
                 {
                     $push: {
                         watchHistory: {
-                            $each: [videoObjectId],
+                            $each: [videoId],
                             $position: 0,
                             $slice: 50,
                         },
                     },
                 },
                 {
-                    new: true,
+                    returnDocument: "after",
                 }
-            );
+            ).lean();
         } catch (err) {
-            console.log(err.message);
             throw new ApiError(
                 500,
                 "error while adding video to watch history"
@@ -282,7 +279,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         createdAt: {
             $gt: oneHourAgo,
         },
-    });
+    }).lean();
 
     if (!hasViewed) {
         try {
@@ -296,7 +293,6 @@ const getVideoById = asyncHandler(async (req, res) => {
                 },
             });
         } catch (err) {
-            console.log(err.message);
             throw new ApiError(500, "error while updating video");
         }
     }
@@ -304,9 +300,9 @@ const getVideoById = asyncHandler(async (req, res) => {
     let finalVideo = video[0];
     finalVideo.isLiked = userId
         ? !!(await Like.exists({
-              video: videoId,
-              likedBy: userId,
-          }))
+            video: videoId,
+            likedBy: userId,
+        }).lean())
         : false;
     if (!finalVideo) {
         throw new ApiError(500, "error while adding like status to video");
@@ -334,7 +330,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         if (NewThumbnailPath) {
             thumbnailResponse = await uploadOnCloud(NewThumbnailPath);
         }
-        const video = await Video.findById(videoId);
+        const video = await Video.findById(videoId).lean();
         const fileToBeDeleted = video?.thumbnail.public_id;
         const videoChanges = await Video.findByIdAndUpdate(
             videoId,
@@ -355,9 +351,9 @@ const updateVideo = asyncHandler(async (req, res) => {
                 },
             },
             {
-                new: true,
+                returnDocument: "after"
             }
-        );
+        ).lean();
 
         if (thumbnailResponse) {
             if (!fileToBeDeleted) {
@@ -394,10 +390,10 @@ const deleteVideo = asyncHandler(async (req, res) => {
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid video-id");
     }
-    const video = await Video.findById(videoId);
+    const video = await Video.findById(videoId).lean();
     await deleteFromCloud(video.videofile.public_id);
     await deleteFromCloud(video.thumbnail.public_id);
-    const deletedVideo = await Video.findByIdAndDelete(videoId);
+    const deletedVideo = await Video.findByIdAndDelete(videoId).lean();
     if (!deletedVideo) {
         throw new ApiError(500, "Unable to delete the video");
     }
@@ -415,7 +411,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
             "video Id invalid or the video removed by its owner"
         );
     }
-    const video = await Video.findById(videoId);
+    const video = await Video.findById(videoId).lean();
     if (!video) {
         throw new ApiError(500, "Unable to find the video");
     }
