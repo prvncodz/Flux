@@ -4,11 +4,12 @@ const tweetSchema = new Schema(
   {
     content: {
       type: String,
-      required: true,
+      required: [true,"content is required to tweet"],
     },
     owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: [true,"user is required to tweet"],
     },
   },
   { timestamps: true },

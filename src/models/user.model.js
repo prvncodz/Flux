@@ -1,25 +1,26 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+
 const userSchema = new Schema(
 	{
 		userName: {
 			type: String,
-			unique: true,
-			required: true,
-			lowercase: true,
+			unique: [true,"username is already taken"],
+			required: [true,"username is required"],
+			lowercase: [true,"username must be lowercase"],
 			index: true,
 			trim: true,
 		},
 		email: {
 			type: String,
-			required: true,
-			unique: true,
+			required: [true,"email is required"],
+			unique: [true,"email is already taken"],
 			trim: true,
 		},
 		fullName: {
 			type: String,
-			required: true,
+			required: [true,"full name is required"],
 			trim: true,
 		},
 		avatar: {
@@ -40,7 +41,7 @@ const userSchema = new Schema(
 		},
 		password: {
 			type: String,
-			required: true,
+			required: [true,"password is required"],
 		},
 		watchHistory: [
 			{

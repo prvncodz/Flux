@@ -4,7 +4,7 @@ const playlistSchema = new Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true,"name is required to create a playlist"],
     },
 
     description: {
@@ -21,6 +21,7 @@ const playlistSchema = new Schema(
     owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required:[true,"user is required to create a playlist"],
     },
   },
   { timestamps: true },

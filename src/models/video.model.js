@@ -1,7 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 
 const videoSchema = new Schema(
   {
@@ -35,11 +33,11 @@ const videoSchema = new Schema(
     },
     title: {
       type: String,
-      required: true,
+      required: [true,"title is required"],
     },
     duration: {
       type: Number,
-      required: true,
+      required: [true,"video should have a duration"],
     },
     views: {
       type: Number,
@@ -47,7 +45,6 @@ const videoSchema = new Schema(
     },
     isPublished: {
       type: Boolean,
-      required: true,
       default: false,
     },
   },
