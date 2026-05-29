@@ -26,11 +26,11 @@ Flux is a full-stack MERN social platform where tech people share ideas, post co
 
 ## Tech Stack
 
-| Layer    | Tech                                          |
-|----------|-----------------------------------------------|
-| Frontend |React, TailwindCSS, Zustand, Motion, shadcn/ui |
-| Backend  | Node.js, Express                              |
-| Database | MongoDB (Mongoose)                            |
+| Layer    | Tech                              |
+|----------|-----------------------------------|
+| Frontend |React, TailwindCSS, Zustand, Motion|
+| Backend  | Node.js, Express                  |
+| Database | MongoDB (Mongoose)                |
 
 ---
 
