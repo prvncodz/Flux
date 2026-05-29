@@ -6,219 +6,229 @@ import { Like } from "../models/like.model.js";
 import { Video } from "../models/video.model.js";
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
-	const { videoId } = req.params;
-	if (!isValidObjectId(videoId)) {
-		throw new ApiError(403, "object id invalid");
-	}
-	const video = await Video.findById(videoId);
-	if (!video.isPublished) {
-		throw new ApiError(
-			400,
-			"this video is unpublished unable to like the video",
-		);
-	}
+    const { videoId } = req.params;
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(403, "object id invalid");
+    }
+    const video = await Video.findById(videoId);
+    if (!video.isPublished) {
+        throw new ApiError(
+            400,
+            "this video is unpublished unable to like the video"
+        );
+    }
 
-	const existingLike = await Like.findOne({
-		video: videoId,
-		likedBy: req.user?._id,
-	});
+    const existingLike = await Like.findOne({
+        video: videoId,
+        likedBy: req.user?._id,
+    });
 
-	if (existingLike) {
-		const disliked = await Like.findByIdAndDelete(existingLike._id);
+    if (existingLike) {
+        const disliked = await Like.findByIdAndDelete(existingLike._id);
 
-		return res
-			.status(200)
-			.json(new ApiResponse(200, disliked, "video disliked successfully"));
-	}
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(200, disliked, "video disliked successfully")
+            );
+    }
 
-	const liked = await Like.create({
-		video: videoId,
-		likedBy: req.user?._id,
-	});
-	if (!liked) {
-		throw new ApiError(500, "unable to like the video");
-	}
-	return res
-		.status(200)
-		.json(new ApiResponse(200, liked, "video liked successfully!"));
+    const liked = await Like.create({
+        video: videoId,
+        likedBy: req.user?._id,
+    });
+    if (!liked) {
+        throw new ApiError(500, "unable to like the video");
+    }
+    return res
+        .status(200)
+        .json(new ApiResponse(200, liked, "video liked successfully!"));
 });
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
-	const { commentId } = req.params;
+    const { commentId } = req.params;
 
-	if (!isValidObjectId(commentId)) {
-		throw new ApiError(400, "object id invalid");
-	}
+    if (!isValidObjectId(commentId)) {
+        throw new ApiError(400, "object id invalid");
+    }
 
-	const existingLike = await Like.findOne({
-		comment: commentId,
-		likedBy: req.user?._id,
-	});
+    const existingLike = await Like.findOne({
+        comment: commentId,
+        likedBy: req.user?._id,
+    });
 
-	if (existingLike) {
-		const disliked = await Like.findByIdAndDelete(existingLike._id);
+    if (existingLike) {
+        const disliked = await Like.findByIdAndDelete(existingLike._id);
 
-		return res
-			.status(200)
-			.json(new ApiResponse(200, disliked, "Comment disliked successfully"));
-	}
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(200, disliked, "Comment disliked successfully")
+            );
+    }
 
-	const liked = await Like.create({
-		comment: commentId,
-		likedBy: req.user?._id,
-	});
-	if (!liked) {
-		throw new ApiError(500, "unable to like the comment");
-	}
-	return res
-		.status(200)
-		.json(new ApiResponse(200, liked, "Comment liked successfully!"));
+    const liked = await Like.create({
+        comment: commentId,
+        likedBy: req.user?._id,
+    });
+    if (!liked) {
+        throw new ApiError(500, "unable to like the comment");
+    }
+    return res
+        .status(200)
+        .json(new ApiResponse(200, liked, "Comment liked successfully!"));
 });
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
-	const { tweetId } = req.params;
-	if (!isValidObjectId(tweetId)) {
-		throw new ApiError(400, "object id invalid");
-	}
-	const existingLike = await Like.findOne({
-		tweet: tweetId,
-		likedBy: req.user?._id,
-	});
+    const { tweetId } = req.params;
+    if (!isValidObjectId(tweetId)) {
+        throw new ApiError(400, "object id invalid");
+    }
+    const existingLike = await Like.findOne({
+        tweet: tweetId,
+        likedBy: req.user?._id,
+    });
 
-	if (existingLike) {
-		const disliked = await Like.findByIdAndDelete(existingLike._id);
+    if (existingLike) {
+        const disliked = await Like.findByIdAndDelete(existingLike._id);
 
-		return res
-			.status(200)
-			.json(new ApiResponse(200, disliked, "tweet disliked successfully"));
-	}
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(200, disliked, "tweet disliked successfully")
+            );
+    }
 
-	const liked = await Like.create({
-		tweet: tweetId,
-		likedBy: req.user?._id,
-	});
-	if (!liked) {
-		throw new ApiError(500, "unable to like the tweet");
-	}
-	return res
-		.status(200)
-		.json(new ApiResponse(200, liked, "tweet liked successfully!"));
+    const liked = await Like.create({
+        tweet: tweetId,
+        likedBy: req.user?._id,
+    });
+    if (!liked) {
+        throw new ApiError(500, "unable to like the tweet");
+    }
+    return res
+        .status(200)
+        .json(new ApiResponse(200, liked, "tweet liked successfully!"));
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-	const { page = 1, limit = 10, userId } = req.query;
-	const pageNum = parseInt(page);
-	const limitNum = parseInt(limit);
-	if (isNaN(pageNum) || pageNum < 1) {
-		throw new ApiError(400, "page number is invalid");
-	}
-	if (isNaN(limitNum) || limitNum < 1) {
-		throw new ApiError(400, "page number is invalid");
-	}
-	const skipNum = (pageNum - 1) * limitNum;
-	const allLikedVideoIds = await Like.find({ likedBy: req.user?._id }) //got all the video ids where user has liked
-		.select("video");
+    const { page = 1, limit = 10, userId } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    if (isNaN(pageNum) || pageNum < 1) {
+        throw new ApiError(400, "page number is invalid");
+    }
+    if (isNaN(limitNum) || limitNum < 1) {
+        throw new ApiError(400, "page number is invalid");
+    }
+    const skipNum = (pageNum - 1) * limitNum;
+    const allLikedVideoIds = await Like.find({ likedBy: req.user?._id }) //got all the video ids where user has liked
+        .select("video");
 
-	const videos = await Video.find({
-		//got the needed videos with the help of this videoIds
-		_id: { $in: allLikedVideoIds.map((d) => d.video) },
-	})
-		.skip(skipNum)
-		.limit(limitNum)
-	  .populate("owner","avatar fullName")
+    const videos = await Video.find({
+        //got the needed videos with the help of this videoIds
+        _id: { $in: allLikedVideoIds.map((d) => d.video) },
+    })
+        .skip(skipNum)
+        .limit(limitNum)
+        .populate("owner", "avatar fullName");
 
-	if (!videos) {
-		throw new ApiError(500, "Unable to get all liked videos");
-	}
+    if (!videos) {
+        throw new ApiError(500, "Unable to get all liked videos");
+    }
 
-	const promises = videos.map(async (video) => {
-		const obj = video.toObject();
-		obj.isLiked = userId
-			? !!(await Like.exists({ video: video?._id, likedBy: userId }))
-			: false;
-		return obj;
-	});
+    const promises = videos.map(async (video) => {
+        const obj = video.toObject();
+        obj.isLiked = userId
+            ? !!(await Like.exists({ video: video?._id, likedBy: userId }))
+            : false;
+        return obj;
+    });
 
-	const allVideos = await Promise.all(promises);
-	if (!allVideos) {
-		throw new ApiError(500, "unable to fetch all videos with like status");
-	}
+    const allVideos = await Promise.all(promises);
+    if (!allVideos) {
+        throw new ApiError(500, "unable to fetch all videos with like status");
+    }
 
-	return res
-		.status(200)
-		.json(
-			new ApiResponse(200, allVideos, "fetched all liked videos successfully"),
-		);
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                allVideos,
+                "fetched all liked videos successfully"
+            )
+        );
 });
 const getTweetLikesCount = asyncHandler(async (req, res) => {
-	let likesCount = 0;
-	const { tweetId } = req.params;
-	if (!tweetId) {
-		new ApiError(400, "Invalid tweet Id");
-	}
-	likesCount = await Like.countDocuments({ tweet: tweetId });
-	if (!likesCount) {
-		new ApiError(503, "cannot find the like docs for this tweet");
-	}
-	return res
-		.status(200)
-		.json(
-			new ApiResponse(
-				200,
-				likesCount,
-				"Tweet's like count successfully fetched",
-			),
-		);
+    let likesCount = 0;
+    const { tweetId } = req.params;
+    if (!tweetId) {
+        new ApiError(400, "Invalid tweet Id");
+    }
+    likesCount = await Like.countDocuments({ tweet: tweetId });
+    if (!likesCount) {
+        new ApiError(503, "cannot find the like docs for this tweet");
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                likesCount,
+                "Tweet's like count successfully fetched"
+            )
+        );
 });
 
 const getVideoLikesCount = asyncHandler(async (req, res) => {
-	let likesCount = 0;
-	const { videoId } = req.params;
-	if (!videoId) {
-		new ApiError(400, "Invalid video Id");
-	}
+    let likesCount = 0;
+    const { videoId } = req.params;
+    if (!videoId) {
+        new ApiError(400, "Invalid video Id");
+    }
 
-	likesCount = await Like.countDocuments({ video: videoId });
-	if (!likesCount) {
-		new ApiError(503, "cannot find the like docs for this video");
-	}
-	return res
-		.status(200)
-		.json(
-			new ApiResponse(
-				200,
-				likesCount,
-				"Video's like count successfully fetched",
-			),
-		);
+    likesCount = await Like.countDocuments({ video: videoId });
+    if (!likesCount) {
+        new ApiError(503, "cannot find the like docs for this video");
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                likesCount,
+                "Video's like count successfully fetched"
+            )
+        );
 });
 const getCommentLikesCount = asyncHandler(async (req, res) => {
-	let likesCount = 0;
-	const { commentId } = req.params;
-	if (!commentId) {
-		new ApiError(400, "Invalid comment Id");
-	}
-	likesCount = await Like.countDocuments({ comment: commentId });
-	if (!likesCount) {
-		new ApiError(503, "cannot find the like docs for this comment");
-	}
-	return res
-		.status(200)
-		.json(
-			new ApiResponse(
-				200,
-				likesCount,
-				"Comment's like count successfully fetched",
-			),
-		);
+    let likesCount = 0;
+    const { commentId } = req.params;
+    if (!commentId) {
+        new ApiError(400, "Invalid comment Id");
+    }
+    likesCount = await Like.countDocuments({ comment: commentId });
+    if (!likesCount) {
+        new ApiError(503, "cannot find the like docs for this comment");
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                likesCount,
+                "Comment's like count successfully fetched"
+            )
+        );
 });
 
 export {
-	toggleCommentLike,
-	toggleTweetLike,
-	toggleVideoLike,
-	getLikedVideos,
-	getTweetLikesCount,
-	getVideoLikesCount,
-	getCommentLikesCount,
+    toggleCommentLike,
+    toggleTweetLike,
+    toggleVideoLike,
+    getLikedVideos,
+    getTweetLikesCount,
+    getVideoLikesCount,
+    getCommentLikesCount,
 };

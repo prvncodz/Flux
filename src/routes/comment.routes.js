@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  addCommentOnVideo,
-  deleteComment,
-  getVideoComments,
-  updateComment,
-  getTweetComments,
-  getCommentComments,
-  addCommentOnTweet,
-  addCommentOnComment,
+    addCommentOnVideo,
+    deleteComment,
+    getVideoComments,
+    updateComment,
+    getTweetComments,
+    getCommentComments,
+    addCommentOnTweet,
+    addCommentOnComment,
 } from "../controllers/comment.controller.js";
 import { verifyJwt } from "../middlewares/auth.js";
 

@@ -1,12 +1,12 @@
 import { Router } from "express";
 import {
-  getLikedVideos,
-  toggleCommentLike,
-  toggleVideoLike,
-  toggleTweetLike,
-  getTweetLikesCount,
-  getVideoLikesCount,
-  getCommentLikesCount,
+    getLikedVideos,
+    toggleCommentLike,
+    toggleVideoLike,
+    toggleTweetLike,
+    getTweetLikesCount,
+    getVideoLikesCount,
+    getCommentLikesCount,
 } from "../controllers/like.controller.js";
 import { verifyJwt } from "../middlewares/auth.js";
 

@@ -1,12 +1,12 @@
 import { Router } from "express";
 import {
-  addVideoToPlaylist,
-  createPlaylist,
-  deletePlaylist,
-  getPlaylistById,
-  getUserPlaylists,
-  removeVideoFromPlaylist,
-  updatePlaylist,
+    addVideoToPlaylist,
+    createPlaylist,
+    deletePlaylist,
+    getPlaylistById,
+    getUserPlaylists,
+    removeVideoFromPlaylist,
+    updatePlaylist,
 } from "../controllers/playlist.controller.js";
 import { verifyJwt } from "../middlewares/auth.js";
 
@@ -20,9 +20,9 @@ router.delete("/:playlistId", verifyJwt, deletePlaylist);
 
 router.patch("/add/:playlistId", verifyJwt, addVideoToPlaylist);
 router.patch(
-  "/remove/:videoId/:playlistId",
-  verifyJwt,
-  removeVideoFromPlaylist,
+    "/remove/:videoId/:playlistId",
+    verifyJwt,
+    removeVideoFromPlaylist
 );
 
 router.get("/user/:userId", getUserPlaylists);

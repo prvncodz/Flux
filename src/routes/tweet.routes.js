@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  createTweet,
-  deleteTweet,
-  getUserTweets,
-  updateTweet,
-  getAllTweets,
+    createTweet,
+    deleteTweet,
+    getUserTweets,
+    updateTweet,
+    getAllTweets,
 } from "../controllers/tweet.controller.js";
 import { verifyJwt } from "../middlewares/auth.js";
 

@@ -1,30 +1,30 @@
 import mongoose, { Schema } from "mongoose";
 
 const playlistSchema = new Schema(
-  {
-    name: {
-      type: String,
-      required: [true,"name is required to create a playlist"],
-    },
+    {
+        name: {
+            type: String,
+            required: [true, "name is required to create a playlist"],
+        },
 
-    description: {
-      type: String,
-    },
+        description: {
+            type: String,
+        },
 
-    videos: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Video",
-      },
-    ],
+        videos: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Video",
+            },
+        ],
 
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required:[true,"user is required to create a playlist"],
+        owner: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: [true, "user is required to create a playlist"],
+        },
     },
-  },
-  { timestamps: true },
+    { timestamps: true }
 );
 
 export const Playlist = mongoose.model("Playlist", playlistSchema);
