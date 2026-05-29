@@ -6,7 +6,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Like } from "../models/like.model.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
-  //TODO: get all comments for a videoId
   const { videoId } = req.params;
   const { userId } = req.query;
 
@@ -69,7 +68,6 @@ const getVideoComments = asyncHandler(async (req, res) => {
 });
 
 const getTweetComments = asyncHandler(async (req, res) => {
-  //TODO: get all comments for a tweetId
   const { tweetId } = req.params;
   const { userId } = req.query;
 
@@ -130,7 +128,6 @@ const getTweetComments = asyncHandler(async (req, res) => {
     );
 });
 const getCommentComments = asyncHandler(async (req, res) => {
-  //TODO: get all comments for a commentId
   const { commentId } = req.params;
   const { userId } = req.query;
   if (!commentId) {
@@ -191,7 +188,6 @@ const getCommentComments = asyncHandler(async (req, res) => {
 });
 
 const addCommentOnVideo = asyncHandler(async (req, res) => {
-  // TODO: add a comment to a video
   const { videoId } = req.params;
 
   if (!isValidObjectId(videoId)) {
@@ -215,7 +211,6 @@ const addCommentOnVideo = asyncHandler(async (req, res) => {
 });
 
 const addCommentOnTweet = asyncHandler(async (req, res) => {
-  // TODO: add a comment to a tweet
   const { tweetId } = req.params;
 
   if (!isValidObjectId(tweetId)) {
@@ -239,7 +234,6 @@ const addCommentOnTweet = asyncHandler(async (req, res) => {
 });
 
 const addCommentOnComment = asyncHandler(async (req, res) => {
-  // TODO: add a comment to another comment
   const { commentId } = req.params;
 
   if (!isValidObjectId(commentId)) {
@@ -263,7 +257,6 @@ const addCommentOnComment = asyncHandler(async (req, res) => {
 });
 
 const updateComment = asyncHandler(async (req, res) => {
-  // TODO: update a comment
   const { commentId } = req.params;
   const { newContent } = req.body;
   if (!isValidObjectId(commentId)) {
@@ -292,7 +285,6 @@ const updateComment = asyncHandler(async (req, res) => {
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
-  // TODO: delete a comment
   const { commentId } = req.params;
   const deletedComment = await Comment.findByIdAndDelete(commentId);
   if (!deletedComment) {

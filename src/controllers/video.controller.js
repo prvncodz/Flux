@@ -8,7 +8,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloud, deleteFromCloud } from "../utils/cloudinary.js";
 import { Like } from "../models/like.model.js";
 
-// get all exixting users videos
 const getAllVideosByUser = asyncHandler(async (req, res) => {
 	const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
 
@@ -22,7 +21,6 @@ const getAllVideosByUser = asyncHandler(async (req, res) => {
 	if (isNaN(limitNum) || limitNum < 1) {
 		throw new ApiError(400, "limit number is invalid");
 	}
-	//we will make a filter object which will help in filtering the videos with user search query if there is an query given
 	const filter = {};
 	filter.isPublished = true;
 	if (query) {
@@ -46,7 +44,6 @@ const getAllVideosByUser = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, videos, "videos fetched succesfully"));
 });
 
-// get all videos with isLiked field(has current user liked the video from videos)
 const getAllVideos = asyncHandler(async (req, res) => {
 	const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
 
@@ -60,7 +57,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
 	if (isNaN(limitNum) || limitNum < 1) {
 		throw new ApiError(400, "limit number is invalid");
 	}
-	//we will make a filter object which will help in filtering the videos with user search query if there is an query given
 	const filter = {};
 	filter.isPublished = true;
 	if (query) {
@@ -95,7 +91,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, allVideos, "videos fetched succesfully"));
 });
 
-// publish a video
 const publishAVideo = asyncHandler(async (req, res) => {
 	try {
 		const { title, description } = req.body;
@@ -154,7 +149,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
 	}
 });
 
-//get video details by its id
 const getVideoById = asyncHandler(async (req, res) => {
 	const { videoId } = req.params;
 	const visitorId = req.user?._id || req.visitorId;
@@ -165,7 +159,6 @@ const getVideoById = asyncHandler(async (req, res) => {
 	}
 
 	if (req.user?._id) {
-		//add video to watch history
 		try {
 			const videoObjectId = new mongoose.Types.ObjectId(videoId);
 			await User.findByIdAndUpdate(
@@ -309,7 +302,6 @@ const getVideoById = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, finalVideo, "video fetched by id succesfully"));
 });
 
-//update changes existing video
 const updateVideo = asyncHandler(async (req, res) => {
 	try {
 		const { videoId } = req.params;
@@ -377,7 +369,6 @@ const updateVideo = asyncHandler(async (req, res) => {
 	}
 });
 
-//delete a Video
 const deleteVideo = asyncHandler(async (req, res) => {
 	const { videoId } = req.params;
 	if (!isValidObjectId(videoId)) {
@@ -396,7 +387,6 @@ const deleteVideo = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, deletedVideo, "video deleted succesfully"));
 });
 
-//video is published or not
 const togglePublishStatus = asyncHandler(async (req, res) => {
 	const { videoId } = req.params;
 	if (!isValidObjectId(videoId)) {

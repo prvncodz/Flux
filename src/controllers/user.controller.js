@@ -4,10 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloud, deleteFromCloud } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
-import ms from "ms";
 
-// generate refresh and access tokens for the user
 const generateAccessAndRefreshTokens = async (userId) => {
 	try {
 		const user = await User.findById(userId);
@@ -22,16 +19,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 	}
 };
 
-//register
 const registerUser = asyncHandler(async (req, res) => {
-	// we will get the user info
-	// validate the info
-	//check is user already exists - username
-	// check for images
-	// if there is an image for avatar upload to cloudinary
-	// make user object and store in db
-	// while removing the pass and refreshTokens because we dont want to send them in the response.
-	// return res
 
 	const { fullName, userName, password, email } = req.body;
 
@@ -40,7 +28,6 @@ const registerUser = asyncHandler(async (req, res) => {
 	) {
 		throw new ApiError(400, "All feilds are required");
 	}
-	//we should await before interacting with the db
 	const existsUser = await User.findOne({ userName });
 	if (existsUser) {
 		throw new ApiError(402, "user already exists");
@@ -51,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 	if (!avatarLocalPath) {
 		throw new ApiError(403, "avatar file path is required to register");
-	} // we should use await while the file get uploaded to the cloud from the local path
+	} 
 	const avatar = await uploadOnCloud(avatarLocalPath);
 
 	const coverImage = await uploadOnCloud(coverImageLocalPath);
@@ -86,16 +73,8 @@ const registerUser = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, createdUser, "User registered successfully"));
 });
 
-//login
 const loginUser = asyncHandler(async (req, res) => {
-	//get the info
-	// validate the input
-	// check for user in db
-	// check password
-	//get res from db
-	// generate acces and refresh tokens
-	//  send cookie
-	const { userName, email, password } = req.body;
+		const { userName, email, password } = req.body;
 	if (!(userName || email)) {
 		throw new ApiError(407, "username or email is required to login");
 	}
@@ -150,7 +129,6 @@ const loginUser = asyncHandler(async (req, res) => {
 			),
 		);
 });
-//logoutUser
 
 const logoutUser = asyncHandler(async (req, res) => {
 	await User.findByIdAndUpdate(
@@ -182,7 +160,6 @@ const logoutUser = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, {}, "user loggedout successfully"));
 });
 
-//update access tokens
 const refreshAccessTokens = asyncHandler(async (req, res) => {
 	const incomingRefreshTokens =
 		req.cookies.refreshTokens || req.body.refreshTokens;
@@ -232,7 +209,6 @@ const refreshAccessTokens = asyncHandler(async (req, res) => {
 		);
 });
 
-//change password
 
 const changePassword = asyncHandler(async (req, res) => {
 	const { oldPassword, newPassword } = req.body;
@@ -254,14 +230,12 @@ const changePassword = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Your password is changed successfully"));
 });
 
-//get current user
 const currentUser = asyncHandler(async (req, res) => {
 	return res
 		.status(200)
 		.json(new ApiResponse(200, req.user, "current user fetched successfully"));
 });
 
-//get user by id
 const getUserById = asyncHandler(async (req, res) => {
 	const { userId } = req.params;
 	const user = await User.findById(userId).select("-password -refreshTokens");
@@ -273,7 +247,6 @@ const getUserById = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, user, "user fetched successfully"));
 });
 
-//update account information
 const updateAccountInfo = asyncHandler(async (req, res) => {
 	const { fullname, email, username } = req.body;
 	const UpdatedFields = {};
@@ -301,7 +274,6 @@ const updateAccountInfo = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, user, "information updated successfully"));
 });
 
-// update user avatar
 const updateUserAvatar = asyncHandler(async (req, res) => {
 	const avatarLocalPath = req.file?.path;
 	if (!avatarLocalPath) {
@@ -330,7 +302,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 	if (fileToBeDeleted) {
 		try {
-			const fileDeleted = await deleteFromCloud(fileToBeDeleted);
+			 await deleteFromCloud(fileToBeDeleted);
 		} catch (err) {
 			throw new ApiError(504, "error while deleting file From Cloud");
 		}
@@ -340,7 +312,6 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, updateAvatar, "avatar updated successfully"));
 });
 
-//updare cover image
 const updateUserCoverImage = asyncHandler(async (req, res) => {
 	const coverImageLocalPath = req.file?.path;
 	if (!coverImageLocalPath) {
@@ -389,7 +360,6 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 			),
 		);
 });
-// show profile
 const showUserProfile = asyncHandler(async (req, res) => {
 	const { username } = req.params;
 	if (!username?.trim()) {
@@ -457,7 +427,6 @@ const showUserProfile = asyncHandler(async (req, res) => {
 		);
 });
 
-//user watch history
 const getWatchHistory = asyncHandler(async (req, res) => {
 	const user = await User.aggregate([
 		{
