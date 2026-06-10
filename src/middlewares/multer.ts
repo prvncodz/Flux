@@ -1,15 +1,13 @@
 import multer from "multer";
 import path from "path";
-import { fileURLToPath } from "url";
+import { Request } from "express";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: function (req: Request, file: Express.Multer.File, cb: (err: Error | null, dest: string) => void) {
         cb(null, path.join(__dirname, "../../public/assets")); // folder to store files
     },
-    filename: function (req, file, cb) {
+    filename: function (req: Request, file: Express.Multer.File, cb: (err: Error | null, filename: string) => void) {
         cb(null, file.originalname);
     },
 });

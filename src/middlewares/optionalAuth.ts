@@ -1,27 +1,41 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
+import { Request, Response, NextFunction } from "express";
 
-const verifyJwtOptional = asyncHandler(async (req, res, next) => {
-    try {
-        const token =
-            (await req.cookies?.accessTokens) ||
-            req.header("authorization")?.replace("Bearer ", "");
+const verifyJwtOptional = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const token =
+                (req.cookies?.accessTokens as string | undefined) ||
+                req.header("authorization")?.replace("Bearer ", "");
 
-        if (!token) {
-            return next();
+            if (!token) {
+                return next();
+            }
+
+            const decoded = jwt.verify(token, String(process.env.ACCESS_TOKEN_SECRET)) as unknown;
+
+            let userId: string | undefined;
+            if (typeof decoded === "object" && decoded !== null) {
+                const d = decoded as Record<string, unknown>;
+                const Id = d._id;
+                if (typeof Id === "string") userId = Id;
+                else userId = String(Id);
+            }
+
+            const user = await User.findById(userId);
+            if (!user) {
+                return next();
+            }
+
+            req.user = user;
+        } catch (error: unknown) {
+            req.user = null;
         }
-        const decodedjwt = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        const user = await User.findById(decodedjwt?._id);
-        if (!user) {
-            return next();
-        }
-        req.user = user;
-    } catch (error) {
-        req.user = null;
+
+        next();
     }
-
-    next();
-});
+);
 
 export { verifyJwtOptional };
