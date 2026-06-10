@@ -1,10 +1,11 @@
+import { Request, Response } from "express";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Playlist } from "../models/playlist.model.js";
 import mongoose, { isValidObjectId } from "mongoose";
 
-const createPlaylist = asyncHandler(async (req, res) => {
+const createPlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { name, description } = req.body;
     if (!name) {
         throw new ApiError(400, "name field is required to create a playlist");
@@ -26,13 +27,13 @@ const createPlaylist = asyncHandler(async (req, res) => {
         );
 });
 
-const getUserPlaylists = asyncHandler(async (req, res) => {
+const getUserPlaylists = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.params;
 
     if (!isValidObjectId(userId)) {
         throw new ApiError(400, "invlaid user id");
     }
-    const { page = 1, limit = 10 } = req.query;
+    const { page = '1', limit = '10' } = req.query as Record<string, string | undefined>;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -66,7 +67,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
         );
 });
 
-const getPlaylistById = asyncHandler(async (req, res) => {
+const getPlaylistById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { playlistId } = req.params;
 
     if (!isValidObjectId(playlistId)) {
@@ -84,12 +85,12 @@ const getPlaylistById = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, playlist, "fetched playlist successfully"));
 });
 
-const addVideoToPlaylist = asyncHandler(async (req, res) => {
+const addVideoToPlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { playlistId } = req.params;
     if (!isValidObjectId(playlistId)) {
         throw new ApiError(400, "inavlid id");
     }
-    const { videoIds } = req.body;
+    const { videoIds } = req.body as { videoIds?: string[] };
     if (!videoIds) {
         throw new ApiError(
             400,
@@ -120,7 +121,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
         );
 });
 
-const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
+const removeVideoFromPlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { playlistId, videoId } = req.params;
 
     if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
@@ -149,7 +150,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
         );
 });
 
-const deletePlaylist = asyncHandler(async (req, res) => {
+const deletePlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { playlistId } = req.params;
 
     if (!isValidObjectId(playlistId)) {
@@ -164,7 +165,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "deleted this Playlist successfully"));
 });
 
-const updatePlaylist = asyncHandler(async (req, res) => {
+const updatePlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { playlistId } = req.params;
     const { name, description } = req.body;
 

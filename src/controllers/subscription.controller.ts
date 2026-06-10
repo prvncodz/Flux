@@ -1,10 +1,11 @@
+import { Request, Response } from "express";
 import mongoose, { isValidObjectId } from "mongoose";
 import { Subscription } from "../models/subscription.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-const toggleSubscription = asyncHandler(async (req, res) => {
+const toggleSubscription = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { channelId } = req.params;
 
     if (!isValidObjectId(channelId)) {
@@ -49,7 +50,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         );
 });
 
-const getUserChannelSubscribers = asyncHandler(async (req, res) => {
+const getUserChannelSubscribers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { channelId } = req.params;
     if (!isValidObjectId(channelId)) {
         throw new ApiError(400, "invalid channel id");
@@ -75,7 +76,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
         );
 });
 
-const getSubscribedChannels = asyncHandler(async (req, res) => {
+const getSubscribedChannels = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { subscriberId } = req.params;
     if (!isValidObjectId(subscriberId)) {
         throw new ApiError(400, "subscriber id is invalid");

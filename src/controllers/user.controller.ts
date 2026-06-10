@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
@@ -5,21 +6,22 @@ import { uploadOnCloud, deleteFromCloud } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
-const generateAccessAndRefreshTokens = async (userId) => {
+const generateAccessAndRefreshTokens = async (userId: string): Promise<{ accessTokens: string; refreshTokens: string }> => {
     try {
-        const user = await User.findById(userId).lean();
+        const user = await User.findById(userId);
+        if (!user) throw new ApiError(500, "user not found to generate tokens");
         const accessTokens = await user.generateAccessTokens();
         const refreshTokens = await user.generateRefreshTokens();
 
         user.refreshTokens = refreshTokens;
         await user.save({ validateBeforeSave: false });
         return { accessTokens, refreshTokens };
-    } catch (error) {
+    } catch (error: unknown) {
         throw new ApiError(500, "unable to generate access and refresh tokens");
     }
 };
 
-const registerUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { fullName, userName, password, email } = req.body;
 
     if (
@@ -76,7 +78,7 @@ const registerUser = asyncHandler(async (req, res) => {
         );
 });
 
-const loginUser = asyncHandler(async (req, res) => {
+const loginUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { userName, email, password } = req.body;
     if (!(userName || email)) {
         throw new ApiError(407, "username or email is required to login");
@@ -98,7 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     const { accessTokens, refreshTokens } =
-        await generateAccessAndRefreshTokens(user._id);
+        await generateAccessAndRefreshTokens(String(user._id));
 
     const loggedUser = await User.findById(user._id).lean().select(
         "-password -refreshTokens"
@@ -130,7 +132,7 @@ const loginUser = asyncHandler(async (req, res) => {
         );
 });
 
-const logoutUser = asyncHandler(async (req, res) => {
+const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -150,7 +152,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "user loggedout successfully"));
 });
 
-const refreshAccessTokens = asyncHandler(async (req, res) => {
+const refreshAccessTokens = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const incomingRefreshTokens =
         req.cookies.refreshTokens || req.body.refreshTokens;
 
@@ -160,16 +162,24 @@ const refreshAccessTokens = asyncHandler(async (req, res) => {
 
     const decodedToken = jwt.verify(
         incomingRefreshTokens,
-        process.env.REFRESH_TOKEN_SECRET
-    );
-    const user = await User.findById(decodedToken?._id).lean();
+        String(process.env.REFRESH_TOKEN_SECRET)
+    ) as unknown;
+
+    let decodedUserId: string | undefined;
+    if (typeof decodedToken === "object" && decodedToken !== null) {
+        const d = decodedToken as Record<string, unknown>;
+        const maybeId = d._id ?? d.id;
+        if (typeof maybeId === "string") decodedUserId = maybeId;
+        else if (typeof maybeId === "number") decodedUserId = String(maybeId);
+    }
+
+    const user = await User.findById(decodedUserId);
 
     if (!user) {
         throw new ApiError(404, "user not found");
     }
 
-    const { accessTokens, refreshTokens } =
-        await generateAccessAndRefreshTokens(user._id);
+    const { accessTokens, refreshTokens } = await generateAccessAndRefreshTokens(String(user._id));
 
     const AtOptions = {
         httpOnly: true,
@@ -195,7 +205,7 @@ const refreshAccessTokens = asyncHandler(async (req, res) => {
         );
 });
 
-const changePassword = asyncHandler(async (req, res) => {
+const changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { oldPassword, newPassword } = req.body;
     if (!(oldPassword || newPassword)) {
         throw new ApiError(
@@ -203,7 +213,8 @@ const changePassword = asyncHandler(async (req, res) => {
             "oldPassword and newPassword is required to make changes"
         );
     }
-    const user = await User.findById(req.user?._id).lean();
+    const user = await User.findById(req.user?._id);
+    if (!user) throw new ApiError(404, "user not found");
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
     if (!isPasswordCorrect) {
         throw new ApiError(400, "wrong password");
@@ -215,7 +226,7 @@ const changePassword = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, "Your password is changed successfully"));
 });
 
-const currentUser = asyncHandler(async (req, res) => {
+const currentUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     return res
         .status(200)
         .json(
@@ -223,7 +234,7 @@ const currentUser = asyncHandler(async (req, res) => {
         );
 });
 
-const getUserById = asyncHandler(async (req, res) => {
+const getUserById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.params;
     const user = await User.findById(userId).lean().select("-password -refreshTokens");
     if (!user) {
@@ -234,7 +245,7 @@ const getUserById = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "user fetched successfully"));
 });
 
-const updateAccountInfo = asyncHandler(async (req, res) => {
+const updateAccountInfo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { fullname, email, username } = req.body;
     const UpdatedFields = {};
     if (fullname) {
@@ -261,7 +272,7 @@ const updateAccountInfo = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "information updated successfully"));
 });
 
-const updateUserAvatar = asyncHandler(async (req, res) => {
+const updateUserAvatar = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const avatarLocalPath = req.file?.path;
     if (!avatarLocalPath) {
         throw new ApiError(400, "uploaded avatar file path unaccessable");
@@ -290,7 +301,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     if (fileToBeDeleted) {
         try {
             await deleteFromCloud(fileToBeDeleted);
-        } catch (err) {
+        } catch (err: unknown) {
             throw new ApiError(504, "error while deleting file From Cloud");
         }
     }
@@ -334,7 +345,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     if (fileToBeDeleted) {
         try {
             const fileDeleted = await deleteFromCloud(fileToBeDeleted);
-        } catch (err) {
+        } catch (err: unknown) {
             throw new ApiError(504, "error while deleting file From Cloud");
         }
     }
@@ -349,7 +360,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
             )
         );
 });
-const showUserProfile = asyncHandler(async (req, res) => {
+const showUserProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { username } = req.params;
     if (!username?.trim()) {
         throw new ApiError(400, "username is missing");
@@ -420,7 +431,7 @@ const showUserProfile = asyncHandler(async (req, res) => {
         );
 });
 
-const getWatchHistory = asyncHandler(async (req, res) => {
+const getWatchHistory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const user = await User.aggregate([
         {
             $match: {

@@ -7,6 +7,7 @@ export interface IComment extends Document {
     tweet?: Types.ObjectId;
     comment?: Types.ObjectId;
     owner: Types.ObjectId;
+    isLiked?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import mongoose, { isValidObjectId, Types } from "mongoose";
 import { Video } from "../models/video.model.js";
 import { User } from "../models/user.model.js";
@@ -8,8 +9,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloud, deleteFromCloud } from "../utils/cloudinary.js";
 import { Like } from "../models/like.model.js";
 
-const getAllVideosByUser = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+const getAllVideosByUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { page = '1', limit = '10', query, sortBy, sortType, userId } = req.query as Record<string, string | undefined>;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -44,8 +45,8 @@ const getAllVideosByUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, videos, "videos fetched succesfully"));
 });
 
-const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+const getAllVideos = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { page = '1', limit = '10', query, sortBy, sortType, userId } = req.query as Record<string, string | undefined>;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -89,7 +90,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, allVideos, "videos fetched succesfully"));
 });
 
-const publishAVideo = asyncHandler(async (req, res) => {
+const publishAVideo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     try {
         const { title, description } = req.body;
 
@@ -120,7 +121,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         }
         const user = await User.findById(req.user?._id);
         if (!user) {
-            throw ApiError(400, "cannot find user");
+            throw new ApiError(400, "cannot find user");
         }
         const UploadedVideo = await Video.create({
             videofile: {
@@ -150,12 +151,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
                     "video uploaded  succesfully"
                 )
             );
-    } catch (error) {
+    } catch (error: unknown) {
         throw new ApiError(500, "unable to publish the video");
     }
 });
 
-const getVideoById = asyncHandler(async (req, res) => {
+const getVideoById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { videoId } = req.params;
     const visitorId = req.user?._id || req.visitorId;
     const { userId } = req.query;
@@ -190,7 +191,7 @@ const getVideoById = asyncHandler(async (req, res) => {
                     returnDocument: "after",
                 }
             ).lean();
-        } catch (err) {
+        } catch (err: unknown) {
             throw new ApiError(
                 500,
                 "error while adding video to watch history"
@@ -315,7 +316,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         );
 });
 
-const updateVideo = asyncHandler(async (req, res) => {
+const updateVideo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     try {
         const { videoId } = req.params;
 
@@ -377,7 +378,7 @@ const updateVideo = asyncHandler(async (req, res) => {
                     "Changes applied to the video succesfully"
                 )
             );
-    } catch (error) {
+    } catch (error: unknown) {
         throw new ApiError(
             400,
             "only thumbnail,title or description can be updated"
@@ -385,7 +386,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     }
 });
 
-const deleteVideo = asyncHandler(async (req, res) => {
+const deleteVideo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { videoId } = req.params;
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid video-id");
@@ -403,7 +404,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, deletedVideo, "video deleted succesfully"));
 });
 
-const togglePublishStatus = asyncHandler(async (req, res) => {
+const togglePublishStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { videoId } = req.params;
     if (!isValidObjectId(videoId)) {
         throw new ApiError(
@@ -411,7 +412,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
             "video Id invalid or the video removed by its owner"
         );
     }
-    const video = await Video.findById(videoId).lean();
+    const video = await Video.findById(videoId);
     if (!video) {
         throw new ApiError(500, "Unable to find the video");
     }

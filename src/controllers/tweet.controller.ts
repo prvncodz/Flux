@@ -1,13 +1,14 @@
+import { Request, Response } from "express";
 import { Tweet } from "../models/tweet.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Like } from "../models/like.model.js";
 
-const createTweet = asyncHandler(async (req, res) => {
+const createTweet = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { content } = req.body;
     if (!content) {
-        throw ApiError(400, "You forgot to add content for tweet :)");
+        throw new ApiError(400, "You forgot to add content for tweet :)");
     }
     const createdTweet = await Tweet.create({
         content,
@@ -21,9 +22,9 @@ const createTweet = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, createdTweet, "created a tweet"));
 });
 
-const getUserTweets = asyncHandler(async (req, res) => {
+const getUserTweets = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = '1', limit = '10' } = req.query as Record<string, string | undefined>;
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skipNum = (pageNum - 1) * limitNum;
@@ -68,7 +69,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
         );
 });
 
-const updateTweet = asyncHandler(async (req, res) => {
+const updateTweet = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { tweetId } = req.params;
     const { content } = req.body;
     if (!content) {
@@ -93,7 +94,7 @@ const updateTweet = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, updatedTweet, "updated tweet successfully"));
 });
-const deleteTweet = asyncHandler(async (req, res) => {
+const deleteTweet = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { tweetId } = req.params;
     if (!tweetId) {
         throw new ApiError(
@@ -111,7 +112,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, deletedTweet, "tweet deleted successfully"));
 });
 
-const getAllTweets = asyncHandler(async (req, res) => {
+const getAllTweets = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { page = 1, limit = 10, query, userId } = req.query;
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);

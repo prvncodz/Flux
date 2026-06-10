@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import { Comment } from "../models/comment.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -5,9 +6,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Like } from "../models/like.model.js";
 
-const getVideoComments = asyncHandler(async (req, res) => {
+const getVideoComments = asyncHandler(async (req: Request, res: Response) => {
     const { videoId } = req.params;
-    const { userId } = req.query;
+    const { userId } = req.query as Record<string, string | undefined>;
 
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "This video is invalid or removed by the user");
@@ -15,7 +16,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     if (!videoId) {
         throw new ApiError(400, "this video id is undefined ");
     }
-    const { page = 1, limit = 10 } = req.query;
+    const { page = '1', limit = '10' } = req.query as Record<string, string | undefined>;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -29,7 +30,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
     }
     const comments = await Comment.find({ video: videoId })
         .skip(skipNum)
-        .limit(limitNum);
+        .limit(limitNum)
+        .lean()
 
     if (!comments) {
         throw new ApiError(500, "Unable to fetch Comments");
@@ -48,11 +50,10 @@ const getVideoComments = asyncHandler(async (req, res) => {
     }
 
     const promises = comments.map(async (comment) => {
-        const obj = comment.toObject();
-        obj.isLiked = userId
-            ? !!(await Like.exists({ comment: obj._id, likedBy: userId }).lean())
+        comment.isLiked = userId
+            ? !!(await Like.exists({ comment: comment?._id, likedBy: userId }).lean())
             : false;
-        return obj;
+        return comment;
     });
 
     const allCommentsWithLikeStatus = await Promise.all(promises);
@@ -67,9 +68,9 @@ const getVideoComments = asyncHandler(async (req, res) => {
         );
 });
 
-const getTweetComments = asyncHandler(async (req, res) => {
+const getTweetComments = asyncHandler(async (req: Request, res: Response) => {
     const { tweetId } = req.params;
-    const { userId } = req.query;
+    const { userId } = req.query as Record<string, string | undefined>;
 
     if (!isValidObjectId(tweetId)) {
         throw new ApiError(400, "This tweet is invalid or removed by the user");
@@ -80,8 +81,8 @@ const getTweetComments = asyncHandler(async (req, res) => {
 
     const { page = 1, limit = 10 } = req.query;
 
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
     const skipNum = (pageNum - 1) * limitNum;
 
     if (isNaN(pageNum) || pageNum < 1) {
@@ -127,9 +128,9 @@ const getTweetComments = asyncHandler(async (req, res) => {
             )
         );
 });
-const getCommentComments = asyncHandler(async (req, res) => {
+const getCommentComments = asyncHandler(async (req: Request, res: Response) => {
     const { commentId } = req.params;
-    const { userId } = req.query;
+    const { userId } = req.query as Record<string, string | undefined>;
     if (!commentId) {
         throw new ApiError(404, "undefined comment Id");
     }
@@ -141,8 +142,8 @@ const getCommentComments = asyncHandler(async (req, res) => {
     }
     const { page = 1, limit = 10 } = req.query;
 
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
     const skipNum = (pageNum - 1) * limitNum;
 
     if (isNaN(pageNum) || pageNum < 1) {
@@ -191,7 +192,7 @@ const getCommentComments = asyncHandler(async (req, res) => {
         );
 });
 
-const addCommentOnVideo = asyncHandler(async (req, res) => {
+const addCommentOnVideo = asyncHandler(async (req: Request, res: Response) => {
     const { videoId } = req.params;
 
     if (!isValidObjectId(videoId)) {
@@ -219,7 +220,7 @@ const addCommentOnVideo = asyncHandler(async (req, res) => {
         );
 });
 
-const addCommentOnTweet = asyncHandler(async (req, res) => {
+const addCommentOnTweet = asyncHandler(async (req: Request, res: Response) => {
     const { tweetId } = req.params;
 
     if (!isValidObjectId(tweetId)) {
@@ -247,7 +248,7 @@ const addCommentOnTweet = asyncHandler(async (req, res) => {
         );
 });
 
-const addCommentOnComment = asyncHandler(async (req, res) => {
+const addCommentOnComment = asyncHandler(async (req: Request, res: Response) => {
     const { commentId } = req.params;
 
     if (!isValidObjectId(commentId)) {
@@ -275,7 +276,7 @@ const addCommentOnComment = asyncHandler(async (req, res) => {
         );
 });
 
-const updateComment = asyncHandler(async (req, res) => {
+const updateComment = asyncHandler(async (req: Request, res: Response) => {
     const { commentId } = req.params;
     const { newContent } = req.body;
     if (!isValidObjectId(commentId)) {
@@ -301,12 +302,16 @@ const updateComment = asyncHandler(async (req, res) => {
         { new: true }
     );
 
+    if (!comment) {
+        throw new ApiError(500, "Unable to update comment");
+    }
+
     return res
         .status(200)
         .json(new ApiResponse(200, comment, "comment updated successfully"));
 });
 
-const deleteComment = asyncHandler(async (req, res) => {
+const deleteComment = asyncHandler(async (req: Request, res: Response) => {
     const { commentId } = req.params;
     const deletedComment = await Comment.findByIdAndDelete(commentId).lean();
     if (!deletedComment) {
