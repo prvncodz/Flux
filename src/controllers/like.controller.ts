@@ -6,9 +6,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Like } from "../models/like.model.js";
 import { Video } from "../models/video.model.js";
 
-type AuthRequest = Request & { user?: { _id?: Types.ObjectId | string } };
 
-const toggleVideoLike = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+const toggleVideoLike = asyncHandler(async (req: Request, res: Response) => {
     const { videoId } = req.params;
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "object id invalid");
@@ -48,7 +47,7 @@ const toggleVideoLike = asyncHandler(async (req: AuthRequest, res: Response): Pr
         .json(new ApiResponse(200, liked, "video liked successfully!"));
 });
 
-const toggleCommentLike = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+const toggleCommentLike = asyncHandler(async (req: Request, res: Response) => {
     const { commentId } = req.params;
 
     if (!isValidObjectId(commentId)) {
@@ -82,7 +81,7 @@ const toggleCommentLike = asyncHandler(async (req: AuthRequest, res: Response): 
         .json(new ApiResponse(200, liked, "Comment liked successfully!"));
 });
 
-const toggleTweetLike = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+const toggleTweetLike = asyncHandler(async (req: Request, res: Response) => {
     const { tweetId } = req.params;
     if (!isValidObjectId(tweetId)) {
         throw new ApiError(400, "object id invalid");
@@ -114,7 +113,7 @@ const toggleTweetLike = asyncHandler(async (req: AuthRequest, res: Response): Pr
         .json(new ApiResponse(200, liked, "tweet liked successfully!"));
 });
 
-const getLikedVideos = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+const getLikedVideos = asyncHandler(async (req: Request, res: Response) => {
     const { page = '1', limit = '10', userId } = req.query as Record<string, string | undefined>;
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -164,7 +163,7 @@ const getLikedVideos = asyncHandler(async (req: AuthRequest, res: Response): Pro
             )
         );
 });
-const getTweetLikesCount = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+const getTweetLikesCount = asyncHandler(async (req: Request, res: Response) => {
     let likesCount = 0;
     const { tweetId } = req.params;
     if (!tweetId) {
@@ -185,7 +184,7 @@ const getTweetLikesCount = asyncHandler(async (req: AuthRequest, res: Response):
         );
 });
 
-const getVideoLikesCount = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+const getVideoLikesCount = asyncHandler(async (req: Request, res: Response) => {
     let likesCount = 0;
     const { videoId } = req.params;
     if (!videoId) {
@@ -206,7 +205,7 @@ const getVideoLikesCount = asyncHandler(async (req: AuthRequest, res: Response):
             )
         );
 });
-const getCommentLikesCount = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+const getCommentLikesCount = asyncHandler(async (req: Request, res: Response) => {
     let likesCount = 0;
     const { commentId } = req.params;
     if (!commentId) {

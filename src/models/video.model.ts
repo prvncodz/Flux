@@ -14,6 +14,7 @@ export interface IVideo extends Document {
   title: string;
   duration: number;
   views: number;
+  isLiked?: boolean;
   isPublished: boolean;
   createdAt?: Date;
   updatedAt?: Date;
