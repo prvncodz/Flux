@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-const toggleSubscription = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const toggleSubscription = asyncHandler(async (req: Request, res: Response) => {
     const { channelId } = req.params;
 
     if (!isValidObjectId(channelId)) {
@@ -13,7 +13,7 @@ const toggleSubscription = asyncHandler(async (req: Request, res: Response): Pro
     }
     const existingSubscribtion = await Subscription.findOne({
         channel: channelId,
-        subscriber: req.user._id,
+        subscriber: req.user?._id,
     }).lean();
 
     if (existingSubscribtion) {
@@ -38,7 +38,7 @@ const toggleSubscription = asyncHandler(async (req: Request, res: Response): Pro
 
     const subscribed = await Subscription.create({
         channel: channelId,
-        subscriber: req.user._id,
+        subscriber: req.user?._id,
     });
     if (!subscribed) {
         throw new ApiError(500, "channel subscriptionsuccessfull");
@@ -50,7 +50,7 @@ const toggleSubscription = asyncHandler(async (req: Request, res: Response): Pro
         );
 });
 
-const getUserChannelSubscribers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getUserChannelSubscribers = asyncHandler(async (req: Request, res: Response)=> {
     const { channelId } = req.params;
     if (!isValidObjectId(channelId)) {
         throw new ApiError(400, "invalid channel id");
@@ -76,7 +76,7 @@ const getUserChannelSubscribers = asyncHandler(async (req: Request, res: Respons
         );
 });
 
-const getSubscribedChannels = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getSubscribedChannels = asyncHandler(async (req: Request, res: Response)=> {
     const { subscriberId } = req.params;
     if (!isValidObjectId(subscriberId)) {
         throw new ApiError(400, "subscriber id is invalid");

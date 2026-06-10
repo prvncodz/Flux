@@ -5,14 +5,14 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Like } from "../models/like.model.js";
 
-const createTweet = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const createTweet = asyncHandler(async (req: Request, res: Response) => {
     const { content } = req.body;
     if (!content) {
         throw new ApiError(400, "You forgot to add content for tweet :)");
     }
     const createdTweet = await Tweet.create({
         content,
-        owner: req.user._id,
+        owner: req.user?._id,
     });
     if (!createdTweet) {
         throw new ApiError(500, "unable to create tweet");
@@ -22,7 +22,7 @@ const createTweet = asyncHandler(async (req: Request, res: Response): Promise<vo
         .json(new ApiResponse(200, createdTweet, "created a tweet"));
 });
 
-const getUserTweets = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getUserTweets = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
     const { page = '1', limit = '10' } = req.query as Record<string, string | undefined>;
     const pageNum = parseInt(page);
@@ -69,7 +69,7 @@ const getUserTweets = asyncHandler(async (req: Request, res: Response): Promise<
         );
 });
 
-const updateTweet = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const updateTweet = asyncHandler(async (req: Request, res: Response) => {
     const { tweetId } = req.params;
     const { content } = req.body;
     if (!content) {
@@ -94,7 +94,7 @@ const updateTweet = asyncHandler(async (req: Request, res: Response): Promise<vo
         .status(200)
         .json(new ApiResponse(200, updatedTweet, "updated tweet successfully"));
 });
-const deleteTweet = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const deleteTweet = asyncHandler(async (req: Request, res: Response) => {
     const { tweetId } = req.params;
     if (!tweetId) {
         throw new ApiError(
@@ -112,10 +112,10 @@ const deleteTweet = asyncHandler(async (req: Request, res: Response): Promise<vo
         .json(new ApiResponse(200, deletedTweet, "tweet deleted successfully"));
 });
 
-const getAllTweets = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getAllTweets = asyncHandler(async (req: Request, res: Response) => {
     const { page = 1, limit = 10, query, userId } = req.query;
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
     const skipNum = (pageNum - 1) * limitNum;
     if (pageNum < 1 || isNaN(pageNum)) {
         throw new ApiError(500, "Invalid page number");
@@ -123,9 +123,9 @@ const getAllTweets = asyncHandler(async (req: Request, res: Response): Promise<v
     if (limitNum < 1 || isNaN(limitNum)) {
         throw new ApiError(500, "Invalid limit is given to the page");
     }
-    const filter = {};
+    const filter: { content?: { $regex: string, $options: string } } = {};
     if (query) {
-        filter.content = { $regex: query, $options: "i" };
+        filter.content = { $regex: (query as string), $options: "i" };
     }
 
     const allTweets = await Tweet.find(filter)
