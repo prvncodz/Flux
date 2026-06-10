@@ -1,15 +1,33 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const userSchema = new Schema(
+export interface IAvatar {
+    url: string;
+    public_id: string;
+}
+
+export interface IUser extends Document {
+    userName: string;
+    email: string;
+    fullName: string;
+    avatar: IAvatar;
+    coverImage?: Partial<IAvatar>;
+    password: string;
+    watchHistory?: Types.ObjectId[];
+    refreshTokens?: string;
+    isPasswordCorrect(password: string): Promise<boolean>;
+    generateAccessTokens(): Promise<string>;
+    generateRefreshTokens(): Promise<string>;
+}
+
+const userSchema = new Schema<IUser>(
     {
         userName: {
             type: String,
             unique: [true, "username is already taken"],
             required: [true, "username is required"],
-            lowercase: [true, "username must be lowercase"],
-            index: true,
+            lowercase: true,
             trim: true,
         },
         email: {
@@ -24,12 +42,10 @@ const userSchema = new Schema(
             trim: true,
         },
         avatar: {
-            // cloudinary url
             url: {
                 type: String,
                 required: true,
             },
-
             public_id: {
                 type: String,
                 required: true,
@@ -56,20 +72,17 @@ const userSchema = new Schema(
     { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
+userSchema.pre<IUser>("save", async function () {
     if (this.isModified("password")) {
         this.password = await bcrypt.hash(this.password, 10);
-        return next();
-    } else {
-        return next();
     }
 });
 
-userSchema.methods.isPasswordCorrect = async function (password) {
-    return await bcrypt.compare(password, this.password);
+userSchema.methods.isPasswordCorrect = async function (password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateAccessTokens = async function () {
+userSchema.methods.generateAccessTokens = async function (): Promise<string> {
     return jwt.sign(
         {
             _id: this._id,
@@ -77,13 +90,14 @@ userSchema.methods.generateAccessTokens = async function () {
             userName: this.userName,
             fullName: this.fullName,
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.ACCESS_TOKEN_SECRET!,
         {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY as any,
         }
     );
 };
-userSchema.methods.generateRefreshTokens = async function () {
+
+userSchema.methods.generateRefreshTokens = async function (): Promise<string> {
     return jwt.sign(
         {
             _id: this._id,
@@ -91,11 +105,11 @@ userSchema.methods.generateRefreshTokens = async function () {
             userName: this.userName,
             fullName: this.fullName,
         },
-        process.env.REFRESH_TOKEN_SECRET,
+        String(process.env.REFRESH_TOKEN_SECRET)!,
         {
-            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY as any,
         }
     );
 };
 
-export const User = mongoose.model("User", userSchema);
+export const User = mongoose.model<IUser>("User", userSchema);

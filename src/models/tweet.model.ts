@@ -1,18 +1,25 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
-const tweetSchema = new Schema(
-    {
-        content: {
-            type: String,
-            required: [true, "content is required to tweet"],
-        },
-        owner: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
-            required: [true, "user is required to tweet"],
-        },
+export interface ITweet extends Document {
+  content: string;
+  owner: Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const tweetSchema = new Schema<ITweet>(
+  {
+    content: {
+      type: String,
+      required: [true, "content is required to tweet"],
     },
-    { timestamps: true }
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "user is required to tweet"],
+    },
+  },
+  { timestamps: true }
 );
 
-export const Tweet = mongoose.model("Tweet", tweetSchema);
+export const Tweet = mongoose.model<ITweet>("Tweet", tweetSchema);

@@ -1,6 +1,13 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
-const viewSchema = new Schema(
+export interface IView extends Document {
+    videoId: Types.ObjectId;
+    userId: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+const viewSchema = new Schema<IView>(
     {
         videoId: {
             type: Schema.Types.ObjectId,
@@ -15,4 +22,4 @@ const viewSchema = new Schema(
     { timestamps: true }
 );
 
-export const View = mongoose.model("View", viewSchema);
+export const View = mongoose.model<IView>("View", viewSchema);
