@@ -11,7 +11,7 @@ import {
 } from "../controllers/comment.controller.js";
 import { verifyJwt } from "../middlewares/auth.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/:videoId/get-video-comments", getVideoComments);
 

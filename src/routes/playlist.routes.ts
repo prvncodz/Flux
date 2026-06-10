@@ -10,7 +10,7 @@ import {
 } from "../controllers/playlist.controller.js";
 import { verifyJwt } from "../middlewares/auth.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.post("/create", verifyJwt, createPlaylist);
 

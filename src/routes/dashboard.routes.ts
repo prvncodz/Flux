@@ -5,7 +5,7 @@ import {
 } from "../controllers/dashboard.controller.js";
 import { verifyJwt } from "../middlewares/auth.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.use(verifyJwt); // Apply verifyJWT middleware to all routes in this file
 

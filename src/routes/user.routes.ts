@@ -16,7 +16,7 @@ import {
 import { upload } from "../middlewares/multer.js";
 import { verifyJwt } from "../middlewares/auth.js";
 
-const router = Router();
+const router: Router = Router();
 router.post(
     "/register",
     upload.fields([

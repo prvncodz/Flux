@@ -13,7 +13,7 @@ import { upload } from "../middlewares/multer.js";
 import { verifyJwtOptional } from "../middlewares/optionalAuth.js";
 import { ensureVisitor } from "../middlewares/ensureVisiter.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/all-videos-by-user", getAllVideosByUser);
 
