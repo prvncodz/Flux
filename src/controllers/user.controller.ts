@@ -21,7 +21,7 @@ const generateAccessAndRefreshTokens = async (userId: string): Promise<{ accessT
     }
 };
 
-const registerUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const registerUser = asyncHandler(async (req: Request, res: Response) => {
     const { fullName, userName, password, email } = req.body;
 
     if (
@@ -36,8 +36,14 @@ const registerUser = asyncHandler(async (req: Request, res: Response): Promise<v
         throw new ApiError(400, "user already exists");
     }
 
-    const avatarLocalPath = req.files?.avatar?.[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+    interface UploadedFiles {
+        avatar?: Express.Multer.File[];
+        coverImage?: Express.Multer.File[];
+    }
+
+    const files = req.files as UploadedFiles;
+    const avatarLocalPath = files?.avatar?.[0]?.path;
+    const coverImageLocalPath = files?.coverImage?.[0]?.path;
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "avatar file path is required to register");
@@ -78,7 +84,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response): Promise<v
         );
 });
 
-const loginUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const { userName, email, password } = req.body;
     if (!(userName || email)) {
         throw new ApiError(407, "username or email is required to login");
@@ -132,9 +138,9 @@ const loginUser = asyncHandler(async (req: Request, res: Response): Promise<void
         );
 });
 
-const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     await User.findByIdAndUpdate(
-        req.user._id,
+        req.user?._id,
         {
             $unset: {
                 refreshTokens: "",
@@ -152,7 +158,7 @@ const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<voi
         .json(new ApiResponse(200, {}, "user loggedout successfully"));
 });
 
-const refreshAccessTokens = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const refreshAccessTokens = asyncHandler(async (req: Request, res: Response) => {
     const incomingRefreshTokens =
         req.cookies.refreshTokens || req.body.refreshTokens;
 
@@ -205,7 +211,7 @@ const refreshAccessTokens = asyncHandler(async (req: Request, res: Response): Pr
         );
 });
 
-const changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const changePassword = asyncHandler(async (req: Request, res: Response) => {
     const { oldPassword, newPassword } = req.body;
     if (!(oldPassword || newPassword)) {
         throw new ApiError(
@@ -226,7 +232,7 @@ const changePassword = asyncHandler(async (req: Request, res: Response): Promise
         .json(new ApiResponse(200, "Your password is changed successfully"));
 });
 
-const currentUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const currentUser = asyncHandler(async (req: Request, res: Response) => {
     return res
         .status(200)
         .json(
@@ -234,7 +240,7 @@ const currentUser = asyncHandler(async (req: Request, res: Response): Promise<vo
         );
 });
 
-const getUserById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getUserById = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
     const user = await User.findById(userId).lean().select("-password -refreshTokens");
     if (!user) {
@@ -245,9 +251,13 @@ const getUserById = asyncHandler(async (req: Request, res: Response): Promise<vo
         .json(new ApiResponse(200, user, "user fetched successfully"));
 });
 
-const updateAccountInfo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const updateAccountInfo = asyncHandler(async (req: Request, res: Response) => {
     const { fullname, email, username } = req.body;
-    const UpdatedFields = {};
+    const UpdatedFields: {
+        fullName?: string,
+        userName?: string,
+        email?: string
+    } = {};
     if (fullname) {
         UpdatedFields.fullName = fullname;
     }
@@ -264,7 +274,7 @@ const updateAccountInfo = asyncHandler(async (req: Request, res: Response): Prom
             $set: UpdatedFields,
         },
         {
-            returnDocument:"after",
+            returnDocument: "after",
         }
     ).lean().select("-password");
     return res
@@ -272,7 +282,7 @@ const updateAccountInfo = asyncHandler(async (req: Request, res: Response): Prom
         .json(new ApiResponse(200, user, "information updated successfully"));
 });
 
-const updateUserAvatar = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const updateUserAvatar = asyncHandler(async (req: Request, res: Response) => {
     const avatarLocalPath = req.file?.path;
     if (!avatarLocalPath) {
         throw new ApiError(400, "uploaded avatar file path unaccessable");
@@ -283,7 +293,7 @@ const updateUserAvatar = asyncHandler(async (req: Request, res: Response): Promi
         throw new ApiError(401, "clodinary upload of avatar failed");
     }
     const user = req.user;
-    const fileToBeDeleted = user.avatar?.public_id;
+    const fileToBeDeleted = user?.avatar?.public_id;
 
     const updateAvatar = await User.findByIdAndUpdate(
         user?._id,
@@ -295,7 +305,7 @@ const updateUserAvatar = asyncHandler(async (req: Request, res: Response): Promi
                 },
             },
         },
-        { returnDocument:"after" }
+        { returnDocument: "after" }
     ).lean().select("-password -refreshTokens");
 
     if (fileToBeDeleted) {
@@ -319,11 +329,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     }
     const coverImage = await uploadOnCloud(coverImageLocalPath);
 
-    if (!coverImage.url) {
+    if (!coverImage?.url) {
         throw new ApiError(401, "clodinary upload of cover image failed ");
     }
     const user = req.user;
-    const public_id = user.coverImage?.public_id;
+    const public_id = user?.coverImage?.public_id;
     const fileToBeDeleted = public_id;
 
     const updateCoverImage = await User.findByIdAndUpdate(
@@ -336,7 +346,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
                 },
             },
         },
-        { returnDocument:"after" }
+        { returnDocument: "after" }
     ).lean().select("-password -refreshTokens");
 
     if (!updateCoverImage) {
@@ -360,16 +370,16 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
             )
         );
 });
-const showUserProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const showUserProfile = asyncHandler(async (req: Request, res: Response) => {
     const { username } = req.params;
-    if (!username?.trim()) {
+    if (!(username as string)?.trim()) {
         throw new ApiError(400, "username is missing");
     }
 
     const channel = await User.aggregate([
         {
             $match: {
-                userName: username?.toLowerCase(),
+                userName: (username as string)?.toLowerCase(),
             },
         },
         {
@@ -431,7 +441,7 @@ const showUserProfile = asyncHandler(async (req: Request, res: Response): Promis
         );
 });
 
-const getWatchHistory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getWatchHistory = asyncHandler(async (req: Request, res: Response) => {
     const user = await User.aggregate([
         {
             $match: {

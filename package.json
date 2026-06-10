@@ -114,7 +114,7 @@
         "wrappy": "^1.0.2"
     },
     "scripts": {
-        "dev": "ts-node -r dotenv/config --experimental-json-modules src/index.ts",
+        "dev": "ts-node -r dotenv/config src/index.ts",
         "format": "prettier --write src/*/*",
         "start": "node -r dotenv/config --experimental-json-modules src/index.ts"
     },
