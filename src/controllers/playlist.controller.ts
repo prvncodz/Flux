@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Playlist } from "../models/playlist.model.js";
 import mongoose, { isValidObjectId } from "mongoose";
 
-const createPlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const createPlaylist = asyncHandler(async (req: Request, res: Response) => {
     const { name, description } = req.body;
     if (!name) {
         throw new ApiError(400, "name field is required to create a playlist");
@@ -14,7 +14,7 @@ const createPlaylist = asyncHandler(async (req: Request, res: Response): Promise
     const createdPlaylist = await Playlist.create({
         name,
         description: description ? description : "",
-        owner: req.user._id,
+        owner: req.user?._id,
     });
     return res
         .status(200)
@@ -27,7 +27,7 @@ const createPlaylist = asyncHandler(async (req: Request, res: Response): Promise
         );
 });
 
-const getUserPlaylists = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getUserPlaylists = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     if (!isValidObjectId(userId)) {
@@ -67,7 +67,7 @@ const getUserPlaylists = asyncHandler(async (req: Request, res: Response): Promi
         );
 });
 
-const getPlaylistById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getPlaylistById = asyncHandler(async (req: Request, res: Response) => {
     const { playlistId } = req.params;
 
     if (!isValidObjectId(playlistId)) {
@@ -85,7 +85,7 @@ const getPlaylistById = asyncHandler(async (req: Request, res: Response): Promis
         .json(new ApiResponse(200, playlist, "fetched playlist successfully"));
 });
 
-const addVideoToPlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const addVideoToPlaylist = asyncHandler(async (req: Request, res: Response) => {
     const { playlistId } = req.params;
     if (!isValidObjectId(playlistId)) {
         throw new ApiError(400, "inavlid id");
@@ -104,10 +104,10 @@ const addVideoToPlaylist = asyncHandler(async (req: Request, res: Response): Pro
                 videos: videoIds,
             },
         },
-        { returnDocument:"after" }
+        { returnDocument: "after" }
     ).lean();
     if (!addedVideoToPlaylist) {
-        throw new ApiError("unable to add videos to the playlist");
+        throw new ApiError(500, "unable to add videos to the playlist");
     }
     const newPlaylist = await Playlist.findById(playlistId).lean().populate("videos");
     return res
@@ -121,7 +121,7 @@ const addVideoToPlaylist = asyncHandler(async (req: Request, res: Response): Pro
         );
 });
 
-const removeVideoFromPlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const removeVideoFromPlaylist = asyncHandler(async (req: Request, res: Response) => {
     const { playlistId, videoId } = req.params;
 
     if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
@@ -134,7 +134,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req: Request, res: Response)
                 videos: videoId,
             },
         },
-        { returnDocument:"after" }
+        { returnDocument: "after" }
     ).lean();
     if (!removeVideo) {
         throw new ApiError(500, "unable to remove this video from playlist");
@@ -150,7 +150,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req: Request, res: Response)
         );
 });
 
-const deletePlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const deletePlaylist = asyncHandler(async (req: Request, res: Response) => {
     const { playlistId } = req.params;
 
     if (!isValidObjectId(playlistId)) {
@@ -165,7 +165,7 @@ const deletePlaylist = asyncHandler(async (req: Request, res: Response): Promise
         .json(new ApiResponse(200, {}, "deleted this Playlist successfully"));
 });
 
-const updatePlaylist = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const updatePlaylist = asyncHandler(async (req: Request, res: Response) => {
     const { playlistId } = req.params;
     const { name, description } = req.body;
 
@@ -183,7 +183,7 @@ const updatePlaylist = asyncHandler(async (req: Request, res: Response): Promise
                 description: description ? description : "",
             },
         },
-        { returnDocument: "after"}
+        { returnDocument: "after" }
     ).lean();
 
     if (!updatedPlaylist) {
