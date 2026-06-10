@@ -6,9 +6,6 @@ dbConn
         app.listen(process.env.PORT || 8000, () => {
             console.log(`app is running at: http://localhost:${process.env.PORT}`);
         });
-        app.on("error", () => {
-            console.log("app failed to run !!");
-        });
     })
 
     .catch((err) => {
