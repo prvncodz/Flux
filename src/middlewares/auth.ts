@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import jwt from "jsonwebtoken";
+import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import { Request, Response, NextFunction } from "express";
 
@@ -32,8 +32,17 @@ const verifyJwt = asyncHandler(
 
       req.user = user;
       next();
+
     } catch (error: unknown) {
-      throw new ApiError(401, "invalid access token");
+      if(error instanceof ApiError){
+        throw error;
+      }else if(error instanceof JsonWebTokenError){
+        throw new ApiError(401, "invalid token");
+      }else if(error instanceof TokenExpiredError){
+       throw new ApiError(401, "token expired");
+      } else{
+      throw new ApiError(500, "something went wrong");
+      }
     }
   }
 );

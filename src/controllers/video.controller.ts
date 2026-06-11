@@ -9,8 +9,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloud, deleteFromCloud } from "../utils/cloudinary.js";
 import { Like } from "../models/like.model.js";
 
-const getAllVideosByUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { page = '1', limit = '10', query, sortBy, sortType, userId } = req.query as Record<string, string | undefined>;
+const getAllVideosByUser = asyncHandler(async (req: Request, res: Response) => {
+    const { page = '1', limit = '10', query, userId } = req.query as Record<string, string | undefined>;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -22,7 +22,11 @@ const getAllVideosByUser = asyncHandler(async (req: Request, res: Response): Pro
     if (isNaN(limitNum) || limitNum < 1) {
         throw new ApiError(400, "limit number is invalid");
     }
-    const filter = {};
+    const filter: {
+        isPublished?: boolean,
+        title?: { $regex: string, $options: string },
+        owner?: string,
+    } = {};
     filter.isPublished = true;
     if (query) {
         filter.title = { $regex: query, $options: "i" };
@@ -30,12 +34,7 @@ const getAllVideosByUser = asyncHandler(async (req: Request, res: Response): Pro
     if (userId) {
         filter.owner = userId;
     }
-    const sort = {};
-    if (sortBy) {
-        sort[sortBy] = sortType === "desc" ? -1 : 1;
-    }
     const videos = await Video.find(filter)
-        .sort(sort)
         .skip(skipNum)
         .limit(limitNum)
         .populate("owner", "avatar fullName userName");
@@ -45,8 +44,8 @@ const getAllVideosByUser = asyncHandler(async (req: Request, res: Response): Pro
         .json(new ApiResponse(200, videos, "videos fetched succesfully"));
 });
 
-const getAllVideos = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { page = '1', limit = '10', query, sortBy, sortType, userId } = req.query as Record<string, string | undefined>;
+const getAllVideos = asyncHandler(async (req: Request, res: Response) => {
+    const { page = '1', limit = '10', query, userId } = req.query as Record<string, string | undefined>;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -58,17 +57,12 @@ const getAllVideos = asyncHandler(async (req: Request, res: Response): Promise<v
     if (isNaN(limitNum) || limitNum < 1) {
         throw new ApiError(400, "limit number is invalid");
     }
-    const filter = {};
+    const filter: { isPublished?: boolean, title?: { $regex: string, $options: string } } = {};
     filter.isPublished = true;
     if (query) {
         filter.title = { $regex: query, $options: "i" };
     }
-    const sort = {};
-    if (sortBy) {
-        sort[sortBy] = sortType === "desc" ? -1 : 1;
-    }
     const videos = await Video.find(filter)
-        .sort(sort)
         .skip(skipNum)
         .limit(limitNum)
         .populate("owner", "avatar fullName userName");
@@ -90,7 +84,7 @@ const getAllVideos = asyncHandler(async (req: Request, res: Response): Promise<v
         .json(new ApiResponse(200, allVideos, "videos fetched succesfully"));
 });
 
-const publishAVideo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const publishAVideo = asyncHandler(async (req: Request, res: Response) => {
     try {
         const { title, description } = req.body;
 
@@ -100,8 +94,14 @@ const publishAVideo = asyncHandler(async (req: Request, res: Response): Promise<
                 "title field is required to publish a video"
             );
         }
-        const videoFileToPath = req.files?.videofile?.[0]?.path;
-        const thumbnailFileToPath = req.files?.thumbnail?.[0]?.path;
+        interface UplaoadedFiles {
+            videofile?: Express.Multer.File[],
+            thumbnail?: Express.Multer.File[],
+        }
+
+        const files = req.files as UplaoadedFiles
+        const videoFileToPath = files?.videofile?.[0]?.path;
+        const thumbnailFileToPath = files?.thumbnail?.[0]?.path;
 
         if (!videoFileToPath) {
             throw new ApiError(400, "unable to fetch video file path");
@@ -156,7 +156,7 @@ const publishAVideo = asyncHandler(async (req: Request, res: Response): Promise<
     }
 });
 
-const getVideoById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const getVideoById = asyncHandler(async (req: Request, res: Response) => {
     const { videoId } = req.params;
     const visitorId = req.user?._id || req.visitorId;
     const { userId } = req.query;
@@ -201,7 +201,7 @@ const getVideoById = asyncHandler(async (req: Request, res: Response): Promise<v
     const pipeline = [
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(videoId),
+                _id: videoId,
             },
         },
         {
@@ -316,7 +316,7 @@ const getVideoById = asyncHandler(async (req: Request, res: Response): Promise<v
         );
 });
 
-const updateVideo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const updateVideo = asyncHandler(async (req: Request, res: Response) => {
     try {
         const { videoId } = req.params;
 
@@ -324,32 +324,27 @@ const updateVideo = asyncHandler(async (req: Request, res: Response): Promise<vo
             throw new ApiError(400, "videoid is not provided in videoId");
         }
 
+        let fieldToBeUpdated: {
+            title?: string,
+            desciption?: string,
+            thumbnail?: unknown,
+        } = {}
         const { title, description } = req.body;
+        if (title) fieldToBeUpdated.title = title;
+        if (description) fieldToBeUpdated.desciption = description;
 
         const NewThumbnailPath = req.file?.path;
         let thumbnailResponse;
         if (NewThumbnailPath) {
             thumbnailResponse = await uploadOnCloud(NewThumbnailPath);
+            if (thumbnailResponse) fieldToBeUpdated.thumbnail = thumbnailResponse
         }
         const video = await Video.findById(videoId).lean();
         const fileToBeDeleted = video?.thumbnail.public_id;
         const videoChanges = await Video.findByIdAndUpdate(
             videoId,
             {
-                $set: {
-                    ...(thumbnailResponse && {
-                        thumbnail: {
-                            ...(thumbnailResponse?.secure_url && {
-                                url: thumbnailResponse.secure_url,
-                            }),
-                            ...(thumbnailResponse?.public_id && {
-                                public_id: thumbnailResponse.public_id,
-                            }),
-                        },
-                    }),
-                    ...(title && { title: title }),
-                    ...(description && { description: description }),
-                },
+                $set: fieldToBeUpdated
             },
             {
                 returnDocument: "after"
@@ -386,14 +381,14 @@ const updateVideo = asyncHandler(async (req: Request, res: Response): Promise<vo
     }
 });
 
-const deleteVideo = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const deleteVideo = asyncHandler(async (req: Request, res: Response) => {
     const { videoId } = req.params;
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid video-id");
     }
     const video = await Video.findById(videoId).lean();
-    await deleteFromCloud(video.videofile.public_id);
-    await deleteFromCloud(video.thumbnail.public_id);
+    await deleteFromCloud(video?.videofile?.public_id);
+    await deleteFromCloud(video?.thumbnail?.public_id);
     const deletedVideo = await Video.findByIdAndDelete(videoId).lean();
     if (!deletedVideo) {
         throw new ApiError(500, "Unable to delete the video");
@@ -404,7 +399,7 @@ const deleteVideo = asyncHandler(async (req: Request, res: Response): Promise<vo
         .json(new ApiResponse(200, deletedVideo, "video deleted succesfully"));
 });
 
-const togglePublishStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+const togglePublishStatus = asyncHandler(async (req: Request, res: Response) => {
     const { videoId } = req.params;
     if (!isValidObjectId(videoId)) {
         throw new ApiError(
