@@ -54,7 +54,7 @@ export default function Feed({
                     .then((res) => {
                         setVideos((prev) => [...prev, ...res.data?.data]);
                         SetAreVideosFetched(true);
-                        if (res.data.data.length == 0) {
+                        if (res.data?.data?.length == 0) {
                             setHasNoMore(true);
                             setLoading(false);
                         }
@@ -75,7 +75,7 @@ export default function Feed({
                         { signal },
                     )
                     .then((res) => {
-                        if (res.data.data.length == 0) {
+                        if (res.data?.data?.length == 0) {
                             setHasNoMore(true);
                             setLoading(false);
                         }
@@ -127,7 +127,7 @@ export default function Feed({
         };
     }, [fetchType, searchQuery, page]);
 
-    if (areVideosFetched && videos && videos.length > 0) return (
+    if (areVideosFetched && videos && !videos.length) return (
         <div className="flex h-100 w-full justify-center items-center text-base font-medium ">
             No Videos available for this request
         </div>
@@ -145,7 +145,7 @@ export default function Feed({
                         key={idx}
                         video={video}
                         idx={idx}
-                        videosLength={videos.length}
+                        videosLength={videos.length ?? 0}
                         setLoading={setLoading}
                     />
 
