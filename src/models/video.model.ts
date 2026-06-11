@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 export interface IMediaFile {
   url: string;
@@ -69,5 +68,4 @@ const videoSchema = new Schema<IVideo>(
   },
   { timestamps: true }
 );
-videoSchema.plugin(mongooseAggregatePaginate);
 export const Video = mongoose.model<IVideo>("Video", videoSchema);

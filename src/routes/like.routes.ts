@@ -7,8 +7,8 @@ import {
     getTweetLikesCount,
     getVideoLikesCount,
     getCommentLikesCount,
-} from "../controllers/like.controller.js";
-import { verifyJwt } from "../middlewares/auth.js";
+} from "../controllers/like.controller";
+import { verifyJwt } from "../middlewares/auth";
 
 const router: Router = Router();
 // Apply verifyJWT middleware to all routes in this file

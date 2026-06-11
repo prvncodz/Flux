@@ -17,15 +17,15 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 //routes import
-import userRouter from "./routes/user.routes.js";
-import videoRouter from "./routes/video.routes.js";
-import commentRouter from "./routes/comment.routes.js";
-import healthCheckRouter from "./routes/healthcheck.routes.js";
-import likeRouter from "./routes/like.routes.js";
-import tweetRouter from "./routes/tweet.routes.js";
-import playlistRouter from "./routes/playlist.routes.js";
-import subscriptionRouter from "./routes/subscription.routes.js";
-import dashboardRouter from "./routes/dashboard.routes.js";
+import userRouter from "./routes/user.routes";
+import videoRouter from "./routes/video.routes";
+import commentRouter from "./routes/comment.routes";
+import healthCheckRouter from "./routes/healthcheck.routes";
+import likeRouter from "./routes/like.routes";
+import tweetRouter from "./routes/tweet.routes";
+import playlistRouter from "./routes/playlist.routes";
+import subscriptionRouter from "./routes/subscription.routes";
+import dashboardRouter from "./routes/dashboard.routes";
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/videos", videoRouter);

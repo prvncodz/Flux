@@ -8,8 +8,8 @@ import {
     getCommentComments,
     addCommentOnTweet,
     addCommentOnComment,
-} from "../controllers/comment.controller.js";
-import { verifyJwt } from "../middlewares/auth.js";
+} from "../controllers/comment.controller";
+import { verifyJwt } from "../middlewares/auth";
 
 const router: Router = Router();
 

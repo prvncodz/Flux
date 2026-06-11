@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { Tweet } from "../models/tweet.model.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { Like } from "../models/like.model.js";
+import { Tweet } from "../models/tweet.model";
+import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
+import { asyncHandler } from "../utils/asyncHandler";
+import { Like } from "../models/like.model";
 
 const createTweet = asyncHandler(async (req: Request, res: Response) => {
     const { content } = req.body;

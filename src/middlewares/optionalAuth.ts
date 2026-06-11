@@ -1,6 +1,6 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler } from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.model.js";
+import { User } from "../models/user.model";
 import { Request, Response, NextFunction } from "express";
 
 const verifyJwtOptional = asyncHandler(

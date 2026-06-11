@@ -7,11 +7,11 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
-} from "../controllers/video.controller.js";
-import { verifyJwt } from "../middlewares/auth.js";
-import { upload } from "../middlewares/multer.js";
-import { verifyJwtOptional } from "../middlewares/optionalAuth.js";
-import { ensureVisitor } from "../middlewares/ensureVisiter.js";
+} from "../controllers/video.controller";
+import { verifyJwt } from "../middlewares/auth";
+import { upload } from "../middlewares/multer";
+import { verifyJwtOptional } from "../middlewares/optionalAuth";
+import { ensureVisitor } from "../middlewares/ensureVisiter";
 
 const router: Router = Router();
 

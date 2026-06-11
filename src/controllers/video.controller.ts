@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import mongoose, { isValidObjectId, Types } from "mongoose";
-import { Video } from "../models/video.model.js";
-import { User } from "../models/user.model.js";
-import { View } from "../models/view.model.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloud, deleteFromCloud } from "../utils/cloudinary.js";
-import { Like } from "../models/like.model.js";
+import { Video } from "../models/video.model";
+import { User } from "../models/user.model";
+import { View } from "../models/view.model";
+import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
+import { asyncHandler } from "../utils/asyncHandler";
+import { uploadOnCloud, deleteFromCloud } from "../utils/cloudinary";
+import { Like } from "../models/like.model";
 
 const getAllVideosByUser = asyncHandler(async (req: Request, res: Response) => {
     const { page = '1', limit = '10', query, userId } = req.query as Record<string, string | undefined>;

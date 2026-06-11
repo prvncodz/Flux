@@ -1,5 +1,5 @@
-import dbConn from "./db/index.ts";
-import app from "./app.ts";
+import dbConn from "./db/index";
+import app from "./app";
 
 dbConn
     .then(() => {

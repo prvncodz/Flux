@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { Video } from "../models/video.model.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { User } from "../models/user.model.js";
+import { Video } from "../models/video.model";
+import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
+import { asyncHandler } from "../utils/asyncHandler";
+import { User } from "../models/user.model";
 
 const getChannelStats = asyncHandler(async (req: Request, res: Response)=> {
     const dashboard = await User.aggregate([

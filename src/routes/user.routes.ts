@@ -12,9 +12,9 @@ import {
     showUserProfile,
     getWatchHistory,
     getUserById,
-} from "../controllers/user.controller.js";
-import { upload } from "../middlewares/multer.js";
-import { verifyJwt } from "../middlewares/auth.js";
+} from "../controllers/user.controller";
+import { upload } from "../middlewares/multer";
+import { verifyJwt } from "../middlewares/auth";
 
 const router: Router = Router();
 router.post(

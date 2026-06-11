@@ -2,7 +2,7 @@
     "name": "flux",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "index.ts",
     "dependencies": {
         "@tailwindcss/vite": "^4.1.17",
         "accepts": "^2.0.0",
@@ -125,7 +125,6 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
-    "type": "module",
     "bugs": {
         "url": "https://github.com/Prvncodz/backend/issues"
     },
