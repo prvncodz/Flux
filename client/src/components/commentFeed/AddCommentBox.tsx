@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import axios from "../../api/axios";
 import { PlusCircle } from "lucide-react";
 import useUserStore from "../../stores/user.store";
+import { Comment } from "../../types/comment.types";
+
 export default function AddCommentsBox({
     Id,
     fetchType,
@@ -17,7 +19,7 @@ export default function AddCommentsBox({
     setShowAddTweetBox?: (b: boolean) => void;
     setShowAddReplyBox?: (b: boolean) => void;
     setShowSignInPopup?: (b: boolean) => void;
-    setComments?: (updater: (prev: any[]) => any[]) => void;
+    setComments?: React.Dispatch<React.SetStateAction<Comment[]>>;
 }) {
     const [content, setContent] = useState<string>("");
     const addCommentRef = useRef<HTMLButtonElement | null>(null);
@@ -29,43 +31,28 @@ export default function AddCommentsBox({
             return;
         }
         if (content === "" || !content) return;
+        
+        let endpoint = "";
         if (fetchType === "video") {
-            try {
-                const res = await axios.post(`/comments/v/${Id}/add-comment`, {
-                    content: content,
-                });
-                if (res.status == 200) {
-                    setContent("");
-                    setComments && setComments(prev => [...prev, res.data?.data]);
-                }
-            } catch (err) {
-                console.log("error occured while adding a new comment", err);
-            }
+            endpoint = `/comments/v/${Id}/add-comment`;
         } else if (fetchType === "tweet") {
-            try {
-                const res = await axios.post(`/comments/t/${Id}/add-comment`, {
-                    content: content,
-                });
-                if (res.status == 200) {
-                    setContent("");
-                    setComments && setComments(prev => [...prev, res.data?.data]);
-                }
-            } catch (err) {
-                console.log("error occured while adding a new comment", err);
-            }
+            endpoint = `/comments/t/${Id}/add-comment`;
         } else {
-            try {
-                const res = await axios.post(`/comments/c/${Id}/add-comment`, {
-                    content: content,
-                });
-                if (res.status == 200) {
-                    setContent("");
-                    setComments && setComments(prev => [...prev, res.data?.data]);
-                }
-            } catch (err) {
-                console.log("error occured while adding a new comment", err);
-            }
+            endpoint = `/comments/c/${Id}/add-comment`;
         }
+
+        try {
+            const res = await axios.post(endpoint, {
+                content: content,
+            });
+            if (res.status == 200) {
+                setContent("");
+                setComments && setComments(prev => [...prev, res.data?.data]);
+            }
+        } catch (err) {
+            console.log(`error occured while adding a new comment to ${fetchType}`, err);
+        }
+        
         setShowAddReplyBox && setShowAddReplyBox(false);
         setShowAddTweetBox && setShowAddTweetBox(false);
         setContent("");

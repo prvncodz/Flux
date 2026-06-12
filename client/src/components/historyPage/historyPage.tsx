@@ -3,10 +3,11 @@ import Nav from "../home/nav";
 import axios from "../../api/axios";
 import { useState, useEffect } from "react";
 import useTab from "../../stores/tab.store";
+import { Video } from "../../types/video.types";
 
 export default function HistoryPage() {
     const navigate = useNavigate();
-    const [videos, setVideos] = useState([]);
+    const [videos, setVideos] = useState<Video[]>([]);
     const setCurrentPage = useTab(s => s.setTab);
 
     useEffect(() => {
@@ -22,7 +23,7 @@ export default function HistoryPage() {
             }
         }
         getHistory();
-    }, []);
+    }, [setCurrentPage]);
     return (
         <>
             <Nav />
@@ -55,14 +56,14 @@ export default function HistoryPage() {
     );
 }
 
-function VideoCardComponent({ video }) {
-    const [duration, setDuration] = useState("00:00");
-    const [timeOfUpload, setTimeOfUpload] = useState("1 day");
+function VideoCardComponent({ video }: { video: Video }) {
+    const [duration, setDuration] = useState<string>("00:00");
+    const [timeOfUpload, setTimeOfUpload] = useState<string>("1 day");
     const navigate = useNavigate();
 
     useEffect(() => {
-        function calcDuration(dur) {
-            if (!dur) return;
+        function calcDuration(dur?: number) {
+            if (dur === undefined) return;
             const hours = Math.trunc(dur / 3600);
             const minutes = Math.trunc((dur % 3600) / 60);
             const seconds = Math.trunc((dur % 3600) % 60);
@@ -79,7 +80,7 @@ function VideoCardComponent({ video }) {
                 setDuration(`00:${String(seconds).padStart(2, "0")}`);
             }
         }
-        function calcTimeOfUpload(t) {
+        function calcTimeOfUpload(t?: string) {
             if (!t) return;
             const now = new Date();
             const dif = now.getTime() - new Date(t).getTime();
@@ -105,7 +106,9 @@ function VideoCardComponent({ video }) {
             }
         }
         calcTimeOfUpload(video.createdAt);
-        calcDuration(Math.trunc(video.duration));
+        if (video.duration !== undefined) {
+            calcDuration(Math.trunc(video.duration));
+        }
     }, [video]);
 
     function handleShowWatchVideo() {

@@ -4,7 +4,7 @@ import dpfp from "../assets/dpfp.jpg";
 import Button from "../button";
 import UserTick from "../assets/usertick";
 import UserAddIcon from "../assets/useradd";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "../../api/axios";
 import CommentFeed from "../commentFeed/commentFeed";
 import VideoDescription from "./videoDescription";
@@ -14,23 +14,24 @@ import VideoPlayer from "../home/videofeed/VideoPlayer";
 import SignInBanner from "../signinInstructPopup";
 import useUserStore from "../../stores/user.store";
 import useTab from "../../stores/tab.store";
+import { Video } from "../../types/video.types";
 
 export default function WatchVideoPage() {
     const location = useLocation();
     const { videoId } = useParams();
-    const { username, ownerAvatar, fullname } = location.state || {};
-    const [isSubscribed, setIsSubscribed] = useState(false);
-    const [isCommentSectionOpen, setIsCommentSectionOpen] = useState(false);
-    const [video, setVideo] = useState({});
-    const [isLiked, setIsLiked] = useState(false);
-    const [subscribers, setSubscribers] = useState(0);
-    const [isOtherChannel, setIsOtherChannel] = useState(false);
+    const { username, ownerAvatar, fullname } = (location.state || {}) as { username?: string; ownerAvatar?: string; fullname?: string };
+    const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+    const [isCommentSectionOpen, setIsCommentSectionOpen] = useState<boolean>(false);
+    const [video, setVideo] = useState<Video | null>(null);
+    const [isLiked, setIsLiked] = useState<boolean>(false);
+    const [subscribers, setSubscribers] = useState<number>(0);
+    const [isOtherChannel, setIsOtherChannel] = useState<boolean>(false);
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
-    const [signinInstruction, setSigninInstruction] = useState(false);
+    const [signinInstruction, setSigninInstruction] = useState<boolean>(false);
     const setCurrentPage = useTab(s => s.setTab);
 
-    let timeoutId;
+    let timeoutId: ReturnType<typeof setTimeout>;
     async function handleSubscription() {
         clearTimeout(timeoutId);
         if (!isUserLogged) {
@@ -40,8 +41,10 @@ export default function WatchVideoPage() {
         setIsSubscribed(!isSubscribed);
         timeoutId = setTimeout(async () => {
             try {
-                await axios.post(`/subscriptions/c/${video?.owner?._id}`);
-            } catch (error) {
+                if (video?.owner?._id) {
+                    await axios.post(`/subscriptions/c/${video.owner._id}`);
+                }
+            } catch (error: any) {
                 console.log(error);
                 console.log(error.response?.data?.message);
             }
@@ -51,17 +54,21 @@ export default function WatchVideoPage() {
     useEffect(() => {
         if (!videoId) return;
         setCurrentPage("watchVideo")
-        async function getVideoById(Id) {
+        async function getVideoById(Id: string) {
             try {
                 const res = await axios.get(
                     `/videos/c/${Id}${isUserLogged ? `?userId=${user?._id}` : ``}`,
                 );
                 if (res.status === 200) {
-                    setVideo(res.data?.data);
-                    setIsLiked(res.data.data?.isLiked);
-                    setIsSubscribed(res.data?.data?.owner?.isSubscribedByUser);
-                    setSubscribers(res.data?.data?.owner?.totalSubscribers);
-                    if (!isUserLogged || res.data.data.owner?._id !== user?._id) {
+                    const videoData = res.data?.data as Video;
+                    setVideo(videoData);
+                    setIsLiked(!!videoData?.isLiked);
+                    
+                    const owner = videoData?.owner as any;
+                    setIsSubscribed(!!owner?.isSubscribedByUser);
+                    setSubscribers(owner?.totalSubscribers || 0);
+                    
+                    if (!isUserLogged || owner?._id !== user?._id) {
                         setIsOtherChannel(true);
                     } else {
                         setIsOtherChannel(false);
@@ -72,7 +79,7 @@ export default function WatchVideoPage() {
             }
         }
         getVideoById(videoId);
-    }, [videoId, isUserLogged, isLiked]);
+    }, [videoId, isUserLogged, isLiked, user?._id, setCurrentPage]);
 
     return (
         <div className=" scroll-smooth  z-2 bg-[#ffffff]">
@@ -127,7 +134,6 @@ export default function WatchVideoPage() {
                                 <div className="flex gap-0">
                                     <div className={`flex items-center py-3 ${!isOtherChannel ? "px-3 mr-4" : ""} `}>
                                         <LikeButton
-                                            size={20}
                                             fetchType={"video"}
                                             Id={videoId}
                                             likeStatus={isLiked}

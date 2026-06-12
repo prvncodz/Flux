@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect } from "react";
 import CancelIconComponent from "../../userProfile/cancelIconComponent";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,13 +10,16 @@ import {
     ThumbsUp,
 } from "lucide-react";
 
-export default function MenuBar({ setIsMenuOPen, onSignout, isUserLogged }) {
+interface MenuBarProps {
+    setIsMenuOPen: React.Dispatch<React.SetStateAction<boolean>>;
+    onSignout?: () => void;
+    isUserLogged?: boolean;
+}
+
+export default function MenuBar({ setIsMenuOPen, onSignout, isUserLogged }: MenuBarProps) {
     const navigate = useNavigate();
 
-    useEffect(() => {
-        handleNavigation();
-    }, [handleNavigation]);
-    function handleNavigation(dest) {
+    function handleNavigation(dest?: string) {
         if (!dest) return;
         if (dest === "home" || dest === "posts") {
             navigate("/", {
@@ -32,6 +35,10 @@ export default function MenuBar({ setIsMenuOPen, onSignout, isUserLogged }) {
             navigate("/liked-videos");
         }
     }
+
+    useEffect(() => {
+        // No destination passed on mount, doing nothing for now.
+    }, []);
     return (
         <>
             <div className="absolute top-0 left-0 bg-neutral-100 opacity-85 z-30 h-screen w-screen overflow-hidden md:hidden "></div>

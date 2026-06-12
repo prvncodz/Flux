@@ -1,22 +1,23 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Video } from "../../types/video.types";
 
+interface AddVideosModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	onAdd?: (ids: string[]) => void;
+	videos?: Video[];
+	alreadyAdded?: Set<string>;
+}
 
-import React, { useRef } from "react";
 export default function AddVideosModal({
 	isOpen,
 	onClose,
 	onAdd,
-	videos = MOCK_USER_VIDEOS,
-	alreadyAdded = ALREADY_IN_PLAYLIST,
-}: {
-	isOpen: boolean;
-	onClose: () => void;
-	onAdd?: (ids: string[]) => void;
-	videos?: any[];
-	alreadyAdded?: Set<string>;
-}) {
-	const [search, setSearch] = React.useState<string>("");
-	const [selected, setSelected] = React.useState<Set<string>>(new Set());
+	videos = [],
+	alreadyAdded = new Set(),
+}: AddVideosModalProps) {
+	const [search, setSearch] = useState<string>("");
+	const [selected, setSelected] = useState<Set<string>>(new Set());
 	const searchRef = useRef<HTMLInputElement | null>(null);
 
 	// Reset state when modal opens
@@ -30,16 +31,17 @@ export default function AddVideosModal({
 
 	// Close on Escape
 	useEffect(() => {
-		const onKey = (e) => { if (e.key === "Escape") onClose(); };
+		const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
 		if (isOpen) window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
 	}, [isOpen, onClose]);
 
 	const filtered = videos.filter((v) =>
-		v.title.toLowerCase().includes(search.toLowerCase())
+		v.title?.toLowerCase().includes(search.toLowerCase())
 	);
 
-	const toggle = (id) => {
+	const toggle = (id?: string) => {
+		if (!id) return;
 		if (alreadyAdded.has(id)) return;
 		setSelected((prev) => {
 			const next = new Set(prev);
@@ -99,7 +101,7 @@ export default function AddVideosModal({
 							ref={searchRef}
 							type="text"
 							value={search}
-							onChange={(e) => setSearch(e.target.value)}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
 							placeholder="Search your videos..."
 							className="w-full pl-8 pr-4 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-neutral-100 focus:ring-offset-0 transition"
 						/>
@@ -128,8 +130,8 @@ export default function AddVideosModal({
 						</div>
 					) : (
 						filtered.map((video) => {
-							const isAdded = alreadyAdded.has(video._id);
-							const isSelected = selected.has(video._id);
+							const isAdded = video._id ? alreadyAdded.has(video._id) : false;
+							const isSelected = video._id ? selected.has(video._id) : false;
 							return (
 								<button
 									key={video._id}
@@ -224,5 +226,3 @@ export default function AddVideosModal({
 		</div>
 	);
 }
-
-

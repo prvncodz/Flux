@@ -1,21 +1,21 @@
-import { useState, useEvent, useRef, useContext } from "react";
+import { useState } from "react";
 import axios from "../api/axios";
 import SubmitButton from "./submitButton";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../stores/user.store";
 
 export default function SignIn() {
-  const [loading, SetLoading] = useState(false);
-  const [error, SetError] = useState(false);
-  const [isSubmmited, setIsSubmmited] = useState(false);
-  const [firstInputField, setFirstInputField] = useState("");
-  const navigate = new useNavigate();
-  const  setUser = useUserStore(s=>s.setUser);
-  const  setIsUserLogged = useUserStore(s=>s.setIsUserLogged);
+  const [loading, SetLoading] = useState<boolean>(false);
+  const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
+  const [firstInputField, setFirstInputField] = useState<string>("");
+  const navigate = useNavigate();
+  const setUser = useUserStore((s) => s.setUser);
+  const setIsUserLogged = useUserStore((s) => s.setIsUserLogged);
 
-  async function handleFormSubmission(e) {
+  async function handleFormSubmission(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const Data = Object.fromEntries(formData);
     SetLoading(true);
     try {
@@ -25,15 +25,14 @@ export default function SignIn() {
         setUser(res.data?.data?.user);
         setIsUserLogged(true);
         setIsSubmmited(true);
-        e.target.reset();
+        form.reset();
       }
     } catch (error) {
-      SetError(true);
-      e.target.reset();
+      form.reset();
     } finally {
       SetLoading(false);
     }
-    e.target.reset();
+    form.reset();
     setFirstInputField("");
     setTimeout(() => {
       setIsSubmmited(false);
@@ -65,7 +64,7 @@ export default function SignIn() {
               <input
                 type="text"
                 value={firstInputField}
-                onChange={(e) => setFirstInputField(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstInputField(e.target.value)}
                 name={firstInputField.includes("@") ? "email" : "userName"}
                 className="bg-gray-100 w-full
 			mb-4 rounded-md p-1 border

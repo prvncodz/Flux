@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 type TabState = {
   tab: string;
-  setTab: (t: string) => void;
+  setTab: (tab: string) => void;
 };
 
 const useTab = create<TabState>((set: any) => ({

@@ -1,35 +1,34 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import SubmitButton from "../submitButton";
 import axios from "../../api/axios";
 import PopUpComponent from "../uploadPopup/popupComponent";
 
-export default function ChangePassPopup({ setIsPassPopupActive }) {
-	const [loading, SetLoading] = useState(false);
-	const [isSubmmited, setIsSubmmited] = useState(false);
+export default function ChangePassPopup({ setIsPassPopupActive }: { setIsPassPopupActive: (b: boolean) => void }) {
+	const [loading, SetLoading] = useState<boolean>(false);
+	const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
 
-	async function handleFormSubmission(e) {
+	async function handleFormSubmission(e: React.FormEvent<HTMLFormElement>) {
 		SetLoading(true);
 		e.preventDefault();
-		const formData = new FormData(e.target);
-		for (let [k, v] of formData) {
-			console.log(k, v);
-		}
+		const form = e.currentTarget;
+		const formData = new FormData(form);
+		
 		try {
 			await axios.post("/user/change-password", {
 				oldPassword: formData.get("oldPassword"),
 				newPassword: formData.get("newPassword"),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			console.log(error);
 			console.log(`Error name: ${error.name}`);
 			console.log(`Backend message: ${error.response?.data?.message}`);
-			e.target.reset();
+			form.reset();
 		} finally {
 			SetLoading(false);
 		}
 
 		setIsSubmmited(true);
-		e.target.reset();
+		form.reset();
 		setTimeout(() => {
 			setIsSubmmited(false);
 			setIsPassPopupActive(false);
@@ -51,7 +50,7 @@ export default function ChangePassPopup({ setIsPassPopupActive }) {
 						Old Password
 						<input
 							name="oldPassword"
-							type="text"
+							type="password"
 							className="bg-gray-100
                 w-full  mt-1 mb-4 rounded-md p-1 border border-gray-200 shadow-xs"
 						/>
@@ -61,7 +60,7 @@ export default function ChangePassPopup({ setIsPassPopupActive }) {
 						New Password
 						<input
 							name="newPassword"
-							type="text"
+							type="password"
 							className="bg-gray-100
                 w-full  mt-1 mb-4 rounded-md p-1 border border-gray-200 shadow-xs"
 						/>

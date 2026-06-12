@@ -1,6 +1,6 @@
-import { ListVideo, Pen, SquarePen, Trash2, Upload, Video, Videotape } from "lucide-react";
+import { Pen, Trash2 } from "lucide-react";
 
-export default function TweetCardOptions({ handleOption }) {
+export default function TweetCardOptions({ handleOption }: { handleOption: (opt: string) => void }) {
 	return (
 		<div className="absolute bg-gray-50 shadow-sm rounded-xl h-auto w-auto top-18 z-10 right-5 p-3 transition-all pop-in delay-75 flex flex-col gap-2">
 			<div

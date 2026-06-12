@@ -1,20 +1,21 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "../../../api/axios";
 import TweetComponent from "./tweet";
 import { LoaderCircle } from "lucide-react";
 import SignInBanner from "../../signinInstructPopup";
 import useUserStore from "../../../stores/user.store";
+import { Comment as Tweet } from "../../../types/comment.types";
 
-export default function Feed({ fetchType, userId, searchQuery }) {
-    const [tweets, setTweets] = useState([]);
-    const [areTweetsFetched, SetAreTweetsFetched] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
+export default function Feed({ fetchType, userId, searchQuery, className }: { fetchType?: string; userId?: string; searchQuery?: string; className?: string }) {
+    const [tweets, setTweets] = useState<Tweet[]>([]);
+    const [areTweetsFetched, SetAreTweetsFetched] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [page, setPage] = useState<number>(1);
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
-    const [hasNoMore, setHasNoMore] = useState(false);
-    const [showSigninPopup, setShowSigninPopup] = useState(false);
-    const ref = useRef(null);
+    const [hasNoMore, setHasNoMore] = useState<boolean>(false);
+    const [showSigninPopup, setShowSigninPopup] = useState<boolean>(false);
+    const ref = useRef<HTMLDivElement | null>(null);
 
 
     useEffect(() => {
@@ -27,14 +28,14 @@ export default function Feed({ fetchType, userId, searchQuery }) {
     useEffect(() => {
         const el = ref.current;
         function handleScroll() {
-            if (loading || hasNoMore) return;
+            if (loading || hasNoMore || !el) return;
             if (el.scrollTop + el.clientHeight >= el.scrollHeight) {
                 setPage((prev) => prev + 1);
             }
         }
         el?.addEventListener("scroll", handleScroll);
         return () => el?.removeEventListener("scroll", handleScroll);
-    });
+    }, [loading, hasNoMore]);
 
     useEffect(() => {
         if (loading) return;
@@ -42,92 +43,45 @@ export default function Feed({ fetchType, userId, searchQuery }) {
 
         const controller = new AbortController();
         const signal = controller.signal;
-        async function fetchAllTweets() {
+        
+        async function fetchTweets() {
+            let endpoint = "/tweets/get-all-tweets";
+            let params = `?page=${page}${isUserLogged ? `&userId=${user?._id}` : ``}`;
+            
+            if (fetchType === "user" && userId) {
+                endpoint = `/tweets/${userId}`;
+                params = page > 1 ? `?page=${page}` : "";
+            } else if (fetchType === "search" && searchQuery) {
+                params = `?query=${searchQuery}${page > 1 ? `&page=${page}` : ``}${isUserLogged ? `&userId=${user?._id}` : ``}`;
+            }
+
             try {
-                await axios
-                    .get(
-                        `/tweets/get-all-tweets?${page > 1 ? `page=${page}` : ``}${isUserLogged ? `&userId=${user?._id}` : ``}`,
-                        { signal },
-                    )
-                    .then((res) => {
-                        if (res.data.data.length == 0) {
-                            setHasNoMore(true);
-                            setLoading(false);
-                        }
+                const res = await axios.get(`${endpoint}${params}`, { signal });
+                if (res.data.data.length == 0) {
+                    setHasNoMore(true);
+                } else {
+                    if (fetchType === "search" && page === 1) {
+                        setTweets(res.data.data);
+                    } else {
                         setTweets((prev) => [...prev, ...res.data.data]);
-                        SetAreTweetsFetched(true);
-                    });
-            } catch (error) {
-                console.log(error);
+                    }
+                    SetAreTweetsFetched(true);
+                }
+            } catch (error: any) {
+                if (error.name !== 'CanceledError') {
+                    console.log(error);
+                }
             } finally {
                 setLoading(false);
             }
-
-        }
-        async function fetchSearchedTweets(query) {
-            try {
-                await axios
-                    .get(
-                        `/tweets/get-all-tweets?query=${query}${page > 1 ? `&page=${page}` : ``}${isUserLogged ? `&userId=${user?._id}` : ``}`,
-                        { signal },
-                    )
-                    .then((res) => {
-                        if (res.data.data.length == 0) {
-                            setHasNoMore(true);
-                            setLoading(false);
-                        }
-
-                        if (page > 1) {
-                            setTweets((prev) => [...prev, ...res.data?.data]);
-                        } else {
-                            setTweets(res.data.data);
-                        }
-                        SetAreTweetsFetched(true);
-                    });
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setLoading(false);
-            }
-
         }
 
-        async function fetchAllTweetsByUser() {
-            if (!userId) return;
-            try {
-                await axios
-                    .get(`/tweets/${userId}${page > 1 ? `?page=${page}` : ``}`, {
-                        signal,
-                    })
-                    .then((res) => {
-                        if (res.data.data.length == 0) {
-                            setHasNoMore(true);
-                            setLoading(false);
-                        }
-                        setTweets((prev) => [...prev, ...res.data.data]);
-                        SetAreTweetsFetched(true);
-                    });
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setLoading(false);
-            }
-
-        }
-
-        if (fetchType === "user") {
-            fetchAllTweetsByUser();
-        } else if (fetchType === "search") {
-            fetchSearchedTweets(searchQuery);
-        } else {
-            fetchAllTweets();
-        }
-
+        fetchTweets();
 
         return () => {
             controller.abort();
         };
-    }, [user, fetchType, searchQuery, page]);
+    }, [user?._id, isUserLogged, fetchType, searchQuery, page]);
 
     if (tweets.length == 0 && areTweetsFetched) {
         return (
@@ -138,7 +92,7 @@ export default function Feed({ fetchType, userId, searchQuery }) {
     }
     return (
         <div
-            className={`scroll-smooth ${fetchType === "user" ? "md:flex md:justify-center" : "md:flex md:justify-center md:mt-4 md:flex-col"} overflow-y-auto`}
+            className={`scroll-smooth ${fetchType === "user" ? "md:flex md:justify-center" : "md:flex md:justify-center md:mt-4 md:flex-col"} overflow-y-auto ${className || ""}`}
         >
             {showSigninPopup && <SignInBanner setShowPopup={setShowSigninPopup} />}
             <div

@@ -1,5 +1,5 @@
-import { memo, useContext, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Eclipse, Ellipsis, EllipsisVertical, PlayCircleIcon, VideoIcon } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Ellipsis, EllipsisVertical, PlayCircleIcon, VideoIcon } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Description from "../watch/videoDescription";
 import dpfp from "../assets/dpfp.jpg";
@@ -11,38 +11,39 @@ import VideoCardOptions from "./VideoCardOptionsPopup";
 import EditPlaylistPopup from "./EditPlaylist";
 import DeletePlaylist from "./DeletePlaylist";
 import useUserStore from "../../stores/user.store";
+import { Video } from "../../types/video.types";
+import { Playlist } from "../../types/playlist.types";
 
-import React, { useRef } from "react";
 export default function ShowPlaylistPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const user = useUserStore(s=>s.user)
+    const user = useUserStore(s => s.user)
     const { playlist, avatarUrl, fullname, username, name, owner } = (location.state || {}) as any;
-    const [avatar, setAvatar] = React.useState<string | null>(avatarUrl || null);
-    const [channelName, setChannelName] = React.useState<string>(fullname || "");
-    const [userName, setUserName] = React.useState<string>(username || "");
-    const [videos, setVideos] = React.useState<any[]>(playlist?.videos || []);
-    const playPlaylist = useRef<any>(null);
-    const [isUserPlaylistOwner, setIsUserPlaylistOwner] = React.useState<boolean>(false);
+    const [avatar, setAvatar] = useState<string | null>(avatarUrl || null);
+    const [channelName, setChannelName] = useState<string>(fullname || "");
+    const [userName, setUserName] = useState<string>(username || "");
+    const [videos, setVideos] = useState<Video[]>(playlist?.videos || []);
+    const playPlaylist = useRef<HTMLDivElement | null>(null);
+    const [isUserPlaylistOwner, setIsUserPlaylistOwner] = useState<boolean>(false);
     const [isOptionActive, setIsOptionsActive] = useState(false);
     const [isVideoOptionsActive, setIsVideoOptionsActive] = useState(false);
-    const [allUserVideos, setAllUserVideos] = useState([]);
-    const [set, setSet] = useState(() => new Set(playlist?.videos?.map(video => video._id) || []));
+    const [allUserVideos, setAllUserVideos] = useState<Video[]>([]);
+    const [set, setSet] = useState<Set<string>>(() => new Set(playlist?.videos?.map((video: Video) => video._id) || []));
     const [isShowPopup, setShowPopup] = useState(false);
-    const [popupType, setPopupType] = useState("edit");
+    const [popupType, setPopupType] = useState<"edit" | "delete" | string>("edit");
     const { playlistId } = useParams();
-    const [curPlaylist, setCurPlaylist] = useState(playlist || null);
+    const [curPlaylist, setCurPlaylist] = useState<Playlist | null>(playlist || null);
 
-    async function handleDeletePlaylist(id) {
+    async function handleDeletePlaylist() {
         try {
             await axios.delete(`/playlists/${playlistId}`)
                 .then(() => navigate("/"));
-        } catch (error) {
+        } catch (error: any) {
             console.log(error.message);
         }
     }
 
-    async function handleAddVideosToPlaylist(videoIds) {
+    async function handleAddVideosToPlaylist(videoIds: string[]) {
         try {
             const res = await axios.patch(`/playlists/add/${playlistId}`, { videoIds: videoIds })
             setSet(prev => new Set([...prev, ...videoIds]));
@@ -51,24 +52,16 @@ export default function ShowPlaylistPage() {
             console.log(err);
         }
     }
-    useEffect(() => { }, [videos])
-    async function handleOption(optType) {
-        try {
-            if (optType === "edit") {
-                setShowPopup(true);
-                setPopupType("edit");
-                setIsOptionsActive(false);
-            } else if (optType === "delete") {
-                setShowPopup(true);
-                setPopupType("delete");
-                setIsOptionsActive(false);
-            }
-        } catch (err) {
-            console.log(err);
+
+    async function handleOption(optType: string) {
+        if (optType === "edit" || optType === "delete") {
+            setShowPopup(true);
+            setPopupType(optType);
+            setIsOptionsActive(false);
         }
     }
     useEffect(() => {
-        async function fetchAllVideos(id) {
+        async function fetchAllVideos(id: string) {
             try {
                 const res = await axios.get(`/videos/all-videos-by-user?userId=${id}`)
                 if (res.status === 200) {
@@ -78,7 +71,7 @@ export default function ShowPlaylistPage() {
                 console.log(err)
             }
         }
-        async function fetchPlaylist(id) {
+        async function fetchPlaylist(id?: string) {
             if (!id) return;
             try {
                 const res = await axios.get(`/playlists/${id}`)
@@ -97,14 +90,14 @@ export default function ShowPlaylistPage() {
         fetchPlaylist(playlistId);
         if (owner === user?._id) {
             setIsUserPlaylistOwner(true);
-            fetchAllVideos(user?._id);
+            if (user?._id) fetchAllVideos(user._id);
         } else {
             setIsUserPlaylistOwner(false);
         }
-    }, [user])
+    }, [user, owner, playlistId])
 
-    const popup = {
-        "edit": <EditPlaylistPopup setShowPopup={setShowPopup} playlist={curPlaylist} />,
+    const popup: Record<string, React.ReactNode> = {
+        "edit": curPlaylist ? <EditPlaylistPopup setShowPopup={setShowPopup} playlist={curPlaylist} /> : null,
         "delete": <DeletePlaylist isOpen={isShowPopup} onClose={() => setShowPopup(false)} onConfirm={handleDeletePlaylist} playlistName={curPlaylist?.name} />
     }
 
@@ -133,7 +126,7 @@ export default function ShowPlaylistPage() {
             {/* playlist banner */}
             <div className="w-full h-55  rounded-xl overflow-hidden bg-gray-100">
                 <img
-                    src={curPlaylist?.videos[0]?.thumbnail?.url || dbanner}
+                    src={curPlaylist?.videos?.[0]?.thumbnail?.url || dbanner}
                     alt=""
                     className="object-fill h-full w-full"
                 />
@@ -163,7 +156,7 @@ export default function ShowPlaylistPage() {
                 <div className="flex  gap-3 justify-end">
                     <button
                         className="flex items-center gap-2 bg-blue-700 text-white px-6 py-2 rounded-full p-3 font-semibold text-xs "
-                        onClick={() => playPlaylist.current.click()}
+                        onClick={() => playPlaylist.current?.click()}
                     >
                         <PlayCircleIcon size={18} />
                         PLAY
@@ -202,11 +195,19 @@ export default function ShowPlaylistPage() {
     );
 }
 
-const VideoList = ({ videos, setVideos, ref, fullname, avatarUrl, isUserPlaylistOwner, playlistId, setSet }) => {
+interface VideoListProps {
+    videos: Video[];
+    setVideos: React.Dispatch<React.SetStateAction<Video[]>>;
+    fullname: string;
+    avatarUrl: string;
+    isUserPlaylistOwner: boolean;
+    playlistId?: string;
+    setSet: React.Dispatch<React.SetStateAction<Set<string>>>;
+}
 
+const VideoList = React.forwardRef<HTMLDivElement | null, VideoListProps>(({ videos, setVideos, fullname, avatarUrl, isUserPlaylistOwner, playlistId, setSet }, ref) => {
     const navigate = useNavigate();
-    function handleShowWatchVideo(videoId) {
-
+    function handleShowWatchVideo(videoId?: string) {
         if (videoId) {
             navigate(`/watch/video/${videoId}`, {
                 state: {
@@ -216,13 +217,10 @@ const VideoList = ({ videos, setVideos, ref, fullname, avatarUrl, isUserPlaylist
             });
         }
     }
-    useEffect(() => {
 
-    }, [videos])
     return (
         <div className="space-y-4 mt-10">
             {videos?.length !== 0 ?
-
                 videos?.map((video, idx) => (
                     <VideoCardComponent
                         key={video._id}
@@ -242,15 +240,26 @@ const VideoList = ({ videos, setVideos, ref, fullname, avatarUrl, isUserPlaylist
             }
         </div>
     )
+});
+
+interface VideoCardComponentProps {
+    video: Video;
+    idx: number;
+    onClick: () => void;
+    fullname: string;
+    isUserPlaylistOwner: boolean;
+    playlistId?: string;
+    setVideos: React.Dispatch<React.SetStateAction<Video[]>>;
+    setSet: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
-function VideoCardComponent({ video, ref, onClick, fullname, isUserPlaylistOwner, playlistId, setVideos, setSet }) {
-    const [duration, setDuration] = useState("00:00");
-    const [isOptionActive, setIsOptionsActive] = useState(false);
+const VideoCardComponent = React.forwardRef<HTMLDivElement | null, VideoCardComponentProps>(({ video, onClick, fullname, isUserPlaylistOwner, playlistId, setVideos, setSet }, ref) => {
+    const [duration, setDuration] = useState<string>("00:00");
+    const [isOptionActive, setIsOptionsActive] = useState<boolean>(false);
 
     useEffect(() => {
-        function calcDuration(dur) {
-            if (!dur) return;
+        function calcDuration(dur?: number) {
+            if (dur === undefined) return;
             const hours = Math.trunc(dur / 3600);
             const minutes = Math.trunc((dur % 3600) / 60);
             const seconds = Math.trunc((dur % 3600) % 60);
@@ -268,15 +277,16 @@ function VideoCardComponent({ video, ref, onClick, fullname, isUserPlaylistOwner
             }
         }
         calcDuration(video?.duration);
-    }, [video]);
-    async function handleOption(type) {
+    }, [video?.duration]);
+
+    async function handleOption(type: string) {
         if (type === "remove") {
             try {
                 await axios.patch(`/playlists/remove/${video._id}/${playlistId}`)
                 setVideos(prev => prev.filter(v => v._id !== video?._id));
                 setSet(prev => {
                     const newSet = new Set(prev);
-                    newSet.delete(video?._id);
+                    if (video?._id) newSet.delete(video._id);
                     return newSet
                 });
             } catch (err) {
@@ -322,4 +332,4 @@ function VideoCardComponent({ video, ref, onClick, fullname, isUserPlaylistOwner
             </div>
         </div>
     );
-}
+});

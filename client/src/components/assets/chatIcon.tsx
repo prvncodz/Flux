@@ -1,4 +1,9 @@
-const ChatBubbleIcon = ({ size = 24, color = "currentColor" }) => (
+interface ChatBubbleIconProps {
+  size?: number | string;
+  color?: string;
+}
+
+const ChatBubbleIcon = ({ size = 24, color = "currentColor" }: ChatBubbleIconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}

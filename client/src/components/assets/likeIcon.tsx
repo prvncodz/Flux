@@ -1,4 +1,9 @@
-const LikeIcon = ({ size = 24, color = "currentColor" }) => (
+interface LikeIconProps {
+  size?: number | string;
+  color?: string;
+}
+
+const LikeIcon = ({ size = 24, color = "currentColor" }: LikeIconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}

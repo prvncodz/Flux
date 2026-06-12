@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { Eye, ThumbsUp, Users, Video, EyeOff, Edit2, Delete, DeleteIcon, Trash, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, ThumbsUp, Users, Video, EyeOff, Edit2, Trash2 } from "lucide-react";
 import Nav from "../home/nav";
 import axios from "../../api/axios";
 import dbanner from "../assets/dbanner.jpg";
@@ -8,6 +8,7 @@ import EditProfilePopUp from "../userProfile/editProfilePopup";
 import EditVideoPopup from "./EditVideoPopup";
 import { motion } from "motion/react"
 import useTab from "../../stores/tab.store";
+import { Video as VideoType } from "../../types/video.types";
 
 const CheckIcon = () => (
     <svg
@@ -45,7 +46,15 @@ const CrossIcon = () => (
         />
     </svg>
 );
-const Toast = ({ message, visible, onClose, type = "success" }) => {
+
+interface ToastProps {
+    message: string;
+    visible: boolean;
+    onClose: () => void;
+    type?: "success" | "error";
+}
+
+const Toast = ({ message, visible, onClose, type = "success" }: ToastProps) => {
     useEffect(() => {
         if (visible) {
             const t = setTimeout(onClose, 3500);
@@ -81,19 +90,28 @@ const Toast = ({ message, visible, onClose, type = "success" }) => {
     );
 };
 
-
+interface ChannelStats {
+    fullName?: string;
+    userName?: string;
+    avatar?: { url?: string };
+    coverImage?: { url?: string };
+    totalViews?: number;
+    totalLikes?: number;
+    totalSubscribers?: number;
+    totalVideoCount?: number;
+}
 
 export default function Dashboard() {
-    const [userChannelStats, setUserChannelStats] = useState({});
-    const [videos, setVideos] = useState([]);
-    const [isEditPopUpActive, setIsEditPopUpActive] = useState(false);
-    const [showDeleted, setShowDeleted] = useState(false);
-    const [showUpdated, setShowUpdated] = useState(false);
-    const [showPublished, setShowPublished] = useState(false);
-    const [publishStatus, setPublishStatus] = useState("unpublished");
-    const [showPublishError, setShowPublishError] = useState(false);
-    const [showDeleteError, setShowDeleteError] = useState(false);
-    const [showUpdateError, setShowUpdateError] = useState(false);
+    const [userChannelStats, setUserChannelStats] = useState<ChannelStats>({});
+    const [videos, setVideos] = useState<VideoType[]>([]);
+    const [isEditPopUpActive, setIsEditPopUpActive] = useState<boolean>(false);
+    const [showDeleted, setShowDeleted] = useState<boolean>(false);
+    const [showUpdated, setShowUpdated] = useState<boolean>(false);
+    const [showPublished, setShowPublished] = useState<boolean>(false);
+    const [publishStatus, setPublishStatus] = useState<string>("unpublished");
+    const [showPublishError, setShowPublishError] = useState<boolean>(false);
+    const [showDeleteError, setShowDeleteError] = useState<boolean>(false);
+    const [showUpdateError, setShowUpdateError] = useState<boolean>(false);
     const setCurrentPage = useTab(s => s.setTab);
 
     function handleEditProfile() {
@@ -124,7 +142,7 @@ export default function Dashboard() {
         }
         getStats();
         getVideos();
-    }, []);
+    }, [setCurrentPage]);
 
     return (
         <div className="h-auto">
@@ -135,11 +153,12 @@ export default function Dashboard() {
                 }}
                 animate={{
                     opacity: 1,
-                    duration: 100
+                    // duration: 100 // motion/react duration is usually separate
                 }}
-                exit={{
-                    opacity: 0
-                }}
+                transition={{ duration: 0.1 }}
+                // exit={{ // handled by AnimatePresence if used
+                //     opacity: 0
+                // }}
 
                 className="flex justify-center h-screen overflow-y-auto w-full md:pb-2"
             >
@@ -197,13 +216,13 @@ export default function Dashboard() {
                         <div className="relative z-0 ">
                             <img
                                 src={userChannelStats?.coverImage?.url || dbanner}
-                                onError={(e) => (e.target.src = dbanner)}
+                                onError={(e: any) => (e.target.src = dbanner)}
                                 className="h-35.5 w-full relative md:h-45 "
                                 loading="lazy"
                             />
                             <img
                                 src={userChannelStats?.avatar?.url || dpfp}
-                                onError={(e) => (e.target.src = dpfp)}
+                                onError={(e: any) => (e.target.src = dpfp)}
                                 className="h-21 rounded-full absolute left-3 -bottom-12 w-22.5 border-2 border-white md:h-25 md:w-25 md:-bottom-15 lg:-bottom-18"
                                 loading="lazy"
                             />
@@ -280,14 +299,25 @@ export default function Dashboard() {
     );
 }
 
-function VideoCard({ video, setShowDeleted, setShowUpdated, setShowUpdateError, setShowPublished, setPublishStatus, setShowPublishError, setShowDeleteError }) {
-    const [isPublished, setIsPublished] = useState(video.isPublished);
-    const [showEditVideo, setShowEditVideo] = useState(false);
+interface VideoCardProps {
+    video: VideoType;
+    setShowDeleted: (b: boolean) => void;
+    setShowUpdated: (b: boolean) => void;
+    setShowUpdateError: (b: boolean) => void;
+    setShowPublished: (b: boolean) => void;
+    setPublishStatus: (s: string) => void;
+    setShowPublishError: (b: boolean) => void;
+    setShowDeleteError: (b: boolean) => void;
+}
 
-    let timeoutId;
-    async function handleTogglePublish(videoId) {
+function VideoCard({ video, setShowDeleted, setShowUpdated, setShowUpdateError, setShowPublished, setPublishStatus, setShowPublishError, setShowDeleteError }: VideoCardProps) {
+    const [isPublished, setIsPublished] = useState<boolean>(!!video.isPublished);
+    const [showEditVideo, setShowEditVideo] = useState<boolean>(false);
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+    async function handleTogglePublish(videoId: string) {
         clearTimeout(timeoutId);
-        setTimeout(async () => {
+        timeoutId = setTimeout(async () => {
             try {
                 const res = await axios.post(
                     `/videos/c/${videoId}/toggle-publish-status`,
@@ -305,7 +335,7 @@ function VideoCard({ video, setShowDeleted, setShowUpdated, setShowUpdateError, 
         }, 800);
     }
 
-    async function handleDeleteVideo(videoId) {
+    async function handleDeleteVideo(videoId: string) {
         try {
             const res = await axios.delete(`/videos/c/${videoId}/delete-video`);
             if (res.status == 200) {
@@ -343,12 +373,12 @@ function VideoCard({ video, setShowDeleted, setShowUpdated, setShowUpdateError, 
                     <EyeOff size={16} className="text-red-500" />
                 )}
                 <Edit2 className="text-gray-500 hidden cursor-pointer md:block" size={16} onClick={handleUpdateVideo} />
-                <Trash2 className=" hidden cursor-pointer text-red-500 md:block " size={16} onClick={() => handleDeleteVideo(video._id)} />
+                <Trash2 className=" hidden cursor-pointer text-red-500 md:block " size={16} onClick={() => video._id && handleDeleteVideo(video._id)} />
                 <div className="flex items-center gap-2">
                     <button
                         className={`text-xs px-3 py-1 w-20 rounded-md text-white active:scale-95 transition-all cursor-pointer outline-none ${isPublished ? "bg-gray-800" : "bg-gray-600"
                             }`}
-                        onClick={() => handleTogglePublish(video._id)}
+                        onClick={() => video._id && handleTogglePublish(video._id)}
                     >
                         {isPublished ? "Unpublish" : "Publish"}
                     </button>
@@ -358,7 +388,13 @@ function VideoCard({ video, setShowDeleted, setShowUpdated, setShowUpdateError, 
     );
 }
 
-function StatCard({ icon, label, value }) {
+interface StatCardProps {
+    icon: React.ReactNode;
+    label: string;
+    value?: number | string;
+}
+
+function StatCard({ icon, label, value }: StatCardProps) {
     return (
         <div className="flex items-start gap-3 border border-neutral-200 rounded-xl p-5 flex-col md:h-40 md:w-full md:p-5 lg:h-50  ">
             <div className="bg-[#1E549D] text-[#ffffff] p-1.5  rounded-full">

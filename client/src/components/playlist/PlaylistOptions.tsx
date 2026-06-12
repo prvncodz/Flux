@@ -1,6 +1,10 @@
-import { ListVideo, Pen, SquarePen, Trash2, Upload, Video, Videotape } from "lucide-react";
+import { Pen, Trash2 } from "lucide-react";
 
-export default function PlaylistOptions({ handleOption }) {
+interface PlaylistOptionsProps {
+	handleOption: (opt: "edit" | "delete" | string) => void;
+}
+
+export default function PlaylistOptions({ handleOption }: PlaylistOptionsProps) {
 	return (
 		<div className="absolute bg-gray-50 shadow-sm rounded-xl h-auto w-auto top-10 z-10 right-0 p-3 transition-all pop-in delay-75 flex flex-col gap-2">
 			<div

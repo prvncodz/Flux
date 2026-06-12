@@ -1,15 +1,16 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import axios from "../../api/axios";
 import SubmitButton from "../submitButton";
 import PopUpComponent from "./popupComponent";
 
-export default function PostUploadPopup({ setShowPopup }) {
-	const [loading, SetLoading] = useState(false);
-	const [isSubmmited, setIsSubmmited] = useState(false);
+export default function PostUploadPopup({ setShowPopup }: { setShowPopup: (b: boolean) => void }) {
+	const [loading, SetLoading] = useState<boolean>(false);
+	const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
 
-	async function handlePostUpload(e) {
+	async function handlePostUpload(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		const formdata = new FormData(e.target);
+		const form = e.currentTarget;
+		const formdata = new FormData(form);
 		SetLoading(true);
 		const content = formdata.get("content");
 
@@ -44,7 +45,6 @@ export default function PostUploadPopup({ setShowPopup }) {
 						what's on your mind?
 						<textarea
 							name="content"
-							type="text"
 							placeholder="The weather is beautifull..."
 							className="bg-gray-100
                 h-30 w-full p-2 border border-gray-300 text-sm mt-1 outline-none md:h-40"

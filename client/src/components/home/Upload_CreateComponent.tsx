@@ -1,7 +1,7 @@
-import { ListVideo, Pen, SquarePen, Upload, Video, Videotape } from "lucide-react";
+import { ListVideo, Pen, Upload } from "lucide-react";
 import { motion } from "motion/react"
 
-export default function CreateComponent({ handleUpload }) {
+export default function CreateComponent({ handleUpload }: { handleUpload: (type: "video" | "post" | "playlist" | string) => void }) {
     return (
         <motion.div
             className="absolute bg-gray-50 shadow-sm rounded-xl h-auto w-auto top-12 z-10 right-0 p-3 transition-all pop-in delay-75 flex flex-col gap-2"
@@ -10,8 +10,8 @@ export default function CreateComponent({ handleUpload }) {
             }}
             animate={{
                 opacity: 1,
-                duration: 100
             }}
+            transition={{ duration: 0.1 }}
             exit={{
                 opacity: 0
             }}

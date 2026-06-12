@@ -1,13 +1,15 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Nav from "../home/nav";
 import axios from "../../api/axios";
 import useTab from "../../stores/tab.store";
 import useUserStore from "../../stores/user.store";
+import { Video } from "../../types/video.types";
+import { User } from "../../types/user.types";
 
 export default function LikedVideos() {
     const navigate = useNavigate();
-    const [videos, setVideos] = useState([]);
+    const [videos, setVideos] = useState<Video[]>([]);
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
     const setCurrentPage = useTab(s => s.setTab);
@@ -17,7 +19,7 @@ export default function LikedVideos() {
         async function getVideos() {
             try {
                 const res = await axios.get(
-                    `/likes/videos${isUserLogged ? `?userId=${user._id}` : ``}`,
+                    `/likes/videos${isUserLogged ? `?userId=${user?._id}` : ``}`,
                 );
                 if (res.status === 200) {
                     setVideos(res.data?.data);
@@ -27,7 +29,7 @@ export default function LikedVideos() {
             }
         }
         getVideos();
-    }, []);
+    }, [isUserLogged, user?._id, setCurrentPage]);
     return (
         <>
             <Nav />
@@ -60,15 +62,16 @@ export default function LikedVideos() {
     );
 }
 
-function VideoCardComponent({ video }) {
-    const { avatar, fullName } = video?.owner;
-    const [duration, setDuration] = useState("00:00");
-    const [timeOfUpload, setTimeOfUpload] = useState("1 day");
+function VideoCardComponent({ video }: { video: Video }) {
+    const ownerData = video?.owner as User;
+    const { avatar, fullName } = ownerData || {};
+    const [duration, setDuration] = useState<string>("00:00");
+    const [timeOfUpload, setTimeOfUpload] = useState<string>("1 day");
     const navigate = useNavigate();
 
     useEffect(() => {
-        function calcDuration(dur) {
-            if (!dur) return;
+        function calcDuration(dur?: number) {
+            if (dur === undefined) return;
             const hours = Math.trunc(dur / 3600);
             const minutes = Math.trunc((dur % 3600) / 60);
             const seconds = Math.trunc((dur % 3600) % 60);
@@ -85,7 +88,7 @@ function VideoCardComponent({ video }) {
                 setDuration(`00:${String(seconds).padStart(2, "0")}`);
             }
         }
-        function calcTimeOfUpload(t) {
+        function calcTimeOfUpload(t?: string) {
             if (!t) return;
             const now = new Date();
             const dif = now.getTime() - new Date(t).getTime();
@@ -111,7 +114,9 @@ function VideoCardComponent({ video }) {
             }
         }
         calcTimeOfUpload(video.createdAt);
-        calcDuration(Math.trunc(video.duration));
+        if (video.duration !== undefined) {
+            calcDuration(Math.trunc(video.duration));
+        }
     }, [video]);
 
     function handleShowWatchVideo() {

@@ -1,43 +1,46 @@
 import defaultPfp from "../assets/dpfp.jpg";
 import defaultBanner from "../assets/dbanner.jpg";
 import editIcon from "../assets/editimage.png";
-import { useState, useRef, useContext } from "react";
+import dbanner from "../assets/dbanner.jpg";
+import { useState, useRef } from "react";
 import SubmitButton from "../submitButton";
 import axios from "../../api/axios";
 import PopUpComponent from "../uploadPopup/popupComponent";
 import useUserStore from "../../stores/user.store";
+import React from "react";
 
-export default function editProfilePopup({ setIsEditPopUpActive }) {
-    const [coverImagePreview, setCoverImagePreview] = useState(null);
-    const [avatarPreview, setAvatarPreview] = useState(null);
-    const fileRefci = useRef(null);
-    const fileRefav = useRef(null);
-    const [loading, SetLoading] = useState(false);
+export default function editProfilePopup({ setIsEditPopUpActive }: { setIsEditPopUpActive: (b: boolean) => void }) {
+    const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const fileRefci = useRef<HTMLInputElement | null>(null);
+    const fileRefav = useRef<HTMLInputElement | null>(null);
+    const [loading, SetLoading] = useState<boolean>(false);
     const user = useUserStore(s => s.user);
-    const [isSubmmited, setIsSubmmited] = useState(false);
-    const [fullNameInput, setFullNameInput] = useState(
-        user.fullName ? user.fullName : "",
+    const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
+    const [fullNameInput, setFullNameInput] = useState<string>(
+        user?.fullName ? user.fullName : "",
     );
-    const [usernameInput, setUsernameInput] = useState(
-        user.userName ? user.userName : "",
+    const [usernameInput, setUsernameInput] = useState<string>(
+        user?.userName ? user.userName : "",
     );
-    const [emailInput, setEmailInput] = useState(user.email ? user.email : "");
-    const [isInfoModified, setIsInfoModified] = useState(false);
+    const [emailInput, setEmailInput] = useState<string>(user?.email ? user.email : "");
+    const [isInfoModified, setIsInfoModified] = useState<boolean>(false);
 
-    async function handleFormSubmission(e) {
+    async function handleFormSubmission(e: React.FormEvent<HTMLFormElement>) {
         SetLoading(true);
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const avatar = formData.get("avatar");
-        const coverImage = formData.get("coverImage");
-        const fullName = formData.get("fullName");
-        const userName = formData.get("userName");
-        const email = formData.get("email");
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        const avatar = formData.get("avatar") as File | null;
+        const coverImage = formData.get("coverImage") as File | null;
+        const fullName = formData.get("fullName") as string | null;
+        const userName = formData.get("userName") as string | null;
+        const email = formData.get("email") as string | null;
 
         //if we have a coverImage update it with this endpoint below
         if (coverImage && coverImage.size !== 0) {
             try {
-                const res = await axios.patch(
+                await axios.patch(
                     "/user/update-user-coverimage",
                     { coverImage },
                     {
@@ -46,11 +49,11 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                         },
                     },
                 );
-            } catch (error) {
+            } catch (error: any) {
                 console.log(error);
                 console.log(`Error name: ${error.name}`);
                 console.log(`Backend message: ${error.response?.data?.message}`);
-                e.target.reset();
+                form.reset();
             } finally {
                 SetLoading(false);
             }
@@ -58,7 +61,7 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
 
         if (avatar && avatar.size !== 0) {
             try {
-                const res = await axios.patch(
+                await axios.patch(
                     "/user/update-user-avatar",
                     { avatar },
                     {
@@ -67,27 +70,27 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                         },
                     },
                 );
-            } catch (error) {
+            } catch (error: any) {
                 console.log(`Error name: ${error.name}`);
                 console.log(`Backend message: ${error.response?.data?.message}`);
 
-                e.target.reset();
+                form.reset();
             } finally {
                 SetLoading(false);
             }
         }
         if (isInfoModified) {
             try {
-                const res = await axios.patch("/user/update-user-info", {
+                await axios.patch("/user/update-user-info", {
                     fullname: fullName,
                     username: userName,
                     email: email,
                 });
-            } catch (error) {
+            } catch (error: any) {
                 console.log(error);
                 console.log(`Error name: ${error.name}`);
                 console.log(`Backend message: ${error.response?.data?.message}`);
-                e.target.reset();
+                form.reset();
             } finally {
                 SetLoading(false);
             }
@@ -95,22 +98,22 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
         setCoverImagePreview(null);
         setAvatarPreview(null);
         setIsSubmmited(true);
-        e.target.reset();
+        form.reset();
         setTimeout(() => {
             setIsSubmmited(false);
             setIsEditPopUpActive(false);
         }, 1000);
     }
 
-    function handleCoverImage(e) {
-        const file = e.target.files[0];
+    function handleCoverImage(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
         if (file) {
             setCoverImagePreview(URL.createObjectURL(file));
         }
     }
 
-    function handleAvatar(e) {
-        const file = e.target.files[0];
+    function handleAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
         if (file) {
             setAvatarPreview(URL.createObjectURL(file));
         }
@@ -129,14 +132,14 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                             src={
                                 coverImagePreview
                                     ? coverImagePreview
-                                    : user.coverImage
+                                    : user?.coverImage
                                         ? user.coverImage.url
                                         : defaultBanner
                             }
                             onClick={() => {
-                                fileRefci.current.click();
+                                fileRefci.current?.click();
                             }}
-                            onError={(e) => (e.target.src = dbanner)}
+                            onError={(e: any) => (e.target.src = dbanner)}
                             className="h-33
                 w-full rounded-lg relative cursor-pointer md:h-40"
                             loading="lazy"
@@ -144,7 +147,7 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
 
                         <div
                             onClick={() => {
-                                fileRefci.current.click();
+                                fileRefci.current?.click();
                             }}
                         >
                             <div
@@ -172,13 +175,13 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                             src={
                                 avatarPreview
                                     ? avatarPreview
-                                    : user.avatar
+                                    : user?.avatar
                                         ? user.avatar.url
                                         : defaultPfp
                             }
-                            onError={(e) => (e.target.src = dbanner)}
+                            onError={(e: any) => (e.target.src = dbanner)}
                             onClick={() => {
-                                fileRefav.current.click();
+                                fileRefav.current?.click();
                             }}
                             className="h-15
                 w-15 rounded-full absolute -left-1 -bottom-3 cursor-pointer
@@ -186,7 +189,7 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                         />
                         <div
                             onClick={() => {
-                                fileRefav.current.click();
+                                fileRefav.current?.click();
                             }}
                         >
                             <img
@@ -222,7 +225,6 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                                 setFullNameInput(e.target.value);
                                 setIsInfoModified(true);
                             }}
-                            onError={(e) => (e.target.value = user.fullName)}
                         />
                     </label>
                     <label className="text-md font-medium text-gray-700">
@@ -237,7 +239,6 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                                 setUsernameInput(e.target.value);
                                 setIsInfoModified(true);
                             }}
-                            onError={(e) => (e.target.value = user.userName)}
                         />
                     </label>
                     <label className="text-md font-medium text-gray-700">
@@ -248,7 +249,6 @@ export default function editProfilePopup({ setIsEditPopUpActive }) {
                             className="bg-gray-100 w-full mb-4 rounded-md p-1 border border-gray-200
                 shadow-xs mt-1"
                             value={emailInput}
-                            onError={(e) => (e.target.value = user.email)}
                             onChange={(e) => {
                                 setEmailInput(e.target.value);
                                 setIsInfoModified(true);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import axios from "../../../api/axios";
 import LikeIcon from "../../assets/likeIcon";
 import LikeFilledIcon from "../../assets/likeFilledIcon";
@@ -10,109 +10,65 @@ function LikeButton({
     isUserLogged,
     setShowSignInPopup,
 }: {
-    fetchType: "video"|"comment"|"tweet"|string;
+    fetchType: "video" | "comment" | "tweet" | string;
     Id?: string;
     likeStatus?: boolean;
     isUserLogged?: boolean;
     setShowSignInPopup?: (b: boolean) => void;
 }) {
-    const [liked, setLiked] = React.useState<boolean | undefined>(likeStatus);
-    const [count, setCount] = React.useState<number>(0);
+    const [liked, setLiked] = useState<boolean | undefined>(likeStatus);
+    const [count, setCount] = useState<number>(0);
 
     useEffect(() => {
         setLiked(likeStatus);
-        async function getVideoLikeCount(videoId) {
-            if (!videoId) return;
+        async function getLikeCount(id: string, type: string) {
+            if (!id) return;
+            let endpoint = "";
+            if (type === "video") endpoint = `/likes/v/${id}`;
+            else if (type === "comment") endpoint = `/likes/c/${id}`;
+            else endpoint = `/likes/t/${id}`;
+
             try {
-                const res = await axios.get(`/likes/v/${videoId}`);
+                const res = await axios.get(endpoint);
                 if (res.status == 200) {
                     setCount(res.data.data);
                 }
             } catch (err) {
-                console.log(
-                    `Error while fetching video likes with id ${videoId} `,
-                    err,
-                );
+                console.log(`Error while fetching ${type} likes with id ${id}`, err);
             }
         }
-        async function getTweetLikeCount(tweetId) {
-            if (!tweetId) return;
-            try {
-                const res = await axios.get(`/likes/t/${tweetId}`);
-                if (res.status == 200) {
-                    setCount(res.data.data);
-                }
-            } catch (err) {
-                console.log(
-                    `Error while fetching tweet likes with id ${tweetId} `,
-                    err,
-                );
-            }
-        }
-        async function getCommentLikeCount(commentId) {
-            if (!commentId) return;
-            try {
-                const res = await axios.get(`/likes/c/${commentId}`);
-                if (res.status == 200) {
-                    setCount(res.data.data);
-                }
-            } catch (err) {
-                console.log(
-                    `Error while fetching comment likes with id ${commentId} `,
-                    err,
-                );
-            }
-        }
-        if (fetchType === "video") {
-            getVideoLikeCount(Id);
-        } else if (fetchType === "comment") {
-            getCommentLikeCount(Id);
-        } else {
-            getTweetLikeCount(Id);
+        if (Id) {
+            getLikeCount(Id, fetchType);
         }
     }, [fetchType, Id, likeStatus]);
 
-    let timeoutId;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const handleLike = () => {
         clearTimeout(timeoutId);
         if (!isUserLogged) {
-            setShowSignInPopup(true);
+            setShowSignInPopup && setShowSignInPopup(true);
             return;
         }
         if (liked) {
-            setCount(count - 1);
+            setCount(prev => prev - 1);
         } else {
-            setCount(count + 1);
+            setCount(prev => prev + 1);
         }
         setLiked(!liked);
         timeoutId = setTimeout(async () => {
-            if (fetchType === "tweet") {
-                try {
-                    const res = await axios.post(`/likes/toggle/t/${Id}`);
-                    if (res.status == 200) {
-                        console.log(res.data);
-                    }
-                } catch (err) {
-                    console.log(`Error while toggling tweet likes with id ${Id}`, err);
+            if (!Id) return;
+            let endpoint = "";
+            if (fetchType === "tweet") endpoint = `/likes/toggle/t/${Id}`;
+            else if (fetchType === "video") endpoint = `/likes/toggle/v/${Id}`;
+            else endpoint = `/likes/toggle/c/${Id}`;
+
+            try {
+                const res = await axios.post(endpoint);
+                if (res.status == 200) {
+                    console.log(res.data);
                 }
-            } else if (fetchType === "video") {
-                try {
-                    const res = await axios.post(`/likes/toggle/v/${Id}`);
-                    if (res.status == 200) {
-                        console.log(res.data);
-                    }
-                } catch (err) {
-                    console.log(`Error while toggling video likes with id ${Id}`, err);
-                }
-            } else {
-                try {
-                    const res = await axios.post(`/likes/toggle/c/${Id}`);
-                    if (res.status == 200) {
-                        console.log(res.data);
-                    }
-                } catch (err) {
-                    console.log(`Error while toggling comment likes with id ${Id}`, err);
-                }
+            } catch (err) {
+                console.log(`Error while toggling ${fetchType} likes with id ${Id}`, err);
             }
         }, 800);
     };

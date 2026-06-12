@@ -1,18 +1,19 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import SubmitButton from "../../components/submitButton";
 import PopUpComponent from "../uploadPopup/popupComponent";
 import axios from "../../api/axios";
+import { Playlist } from "../../types/playlist.types";
 
-import React from "react";
-export default function EditPlaylistPopup({ setShowPopup, playlist }: { setShowPopup: (b: boolean) => void; playlist?: any; }) {
-	const [loading, SetLoading] = React.useState<boolean>(false);
-	const [isSubmmited, setIsSubmmited] = React.useState<boolean>(false);
-	const [name, setName] = React.useState<string | undefined>(playlist?.name)
-	const [desc, setDesc] = React.useState<string | undefined>(playlist?.description);
+export default function EditPlaylistPopup({ setShowPopup, playlist }: { setShowPopup: (b: boolean) => void; playlist?: Playlist; }) {
+	const [loading, SetLoading] = useState<boolean>(false);
+	const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
+	const [name, setName] = useState<string | undefined>(playlist?.name)
+	const [desc, setDesc] = useState<string | undefined>(playlist?.description);
 
-	async function handlePostUpload(e) {
+	async function handlePostUpload(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		const formdata = new FormData(e.target);
+		const form = e.currentTarget;
+		const formdata = new FormData(form);
 		SetLoading(true);
 
 		try {
@@ -25,7 +26,7 @@ export default function EditPlaylistPopup({ setShowPopup, playlist }: { setShowP
 					},
 				},
 			);
-		} catch (error) {
+		} catch (error: any) {
 			console.log(error.message);
 		}
 		SetLoading(false);
@@ -58,7 +59,6 @@ export default function EditPlaylistPopup({ setShowPopup, playlist }: { setShowP
 						Descripton
 						<textarea
 							name="description"
-							type="text"
 							value={desc}
 							onChange={(e) => setDesc(e.target.value)}
 							placeholder={"Playlist description..."}

@@ -3,13 +3,14 @@ import SubmitButton from "../../submitButton";
 import PopUpComponent from "../../uploadPopup/popupComponent";
 import axios from "../../../api/axios";
 
-export default function CreatePlaylistPopup({ setShowPopup }) {
-	const [loading, SetLoading] = useState(false);
-	const [isSubmmited, setIsSubmmited] = useState(false);
+export default function CreatePlaylistPopup({ setShowPopup }: { setShowPopup: (b: boolean) => void }) {
+	const [loading, SetLoading] = useState<boolean>(false);
+	const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
 
-	async function handlePostUpload(e) {
+	async function handlePostUpload(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		const formdata = new FormData(e.target);
+		const form = e.currentTarget;
+		const formdata = new FormData(form);
 		SetLoading(true);
 
 		try {
@@ -22,7 +23,7 @@ export default function CreatePlaylistPopup({ setShowPopup }) {
 					},
 				},
 			);
-		} catch (error) {
+		} catch (error: any) {
 			console.log(error.message);
 		}
 		SetLoading(false);
@@ -53,10 +54,10 @@ export default function CreatePlaylistPopup({ setShowPopup }) {
 						Descripton
 						<textarea
 							name="description"
-							type="text"
-							placeholder="Playlist description..."
+							placeholder={"Playlist description..."}
 							className="bg-gray-100 w-full border border-gray-300 rounded-xl h-30  p-3  text-sm mt-1 outline-none"
 						/>
+
 					</label>
 					<div className="flex mt-1 gap-3 justify-center md:justify-end">
 						<button

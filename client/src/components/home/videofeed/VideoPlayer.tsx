@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -18,23 +18,23 @@ import {
   ChevronsLeft,
 } from "lucide-react";
 
-const formatTime = (timeInSeconds) => {
+const formatTime = (timeInSeconds: number) => {
   if (!timeInSeconds) return "0:00";
   const minutes = Math.floor(timeInSeconds / 60);
   const seconds = Math.floor(timeInSeconds % 60);
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
-/**
- * Reusable Video Player Component
- * * @param {string} videoUrl - Source URL for the video (Required)
- * @param {boolean} autoplay - Auto start video on load (Default: true)
- * @param {boolean} replay - Auto loop video on end (Default: false)
- * @param {string} theme - 'dark' | 'light' (Default: 'dark')
- * @param {string} color - Primary accent color hex code (Default: '#7c3aed')
- * @param {boolean} fit - If true, video fits within container (contain). If false, it fills (cover). (Default: true)
- */
-import React, { useRef } from "react";
+interface VideoPlayerProps {
+  videoUrl?: string;
+  autoplay?: boolean;
+  replay?: boolean;
+  theme?: "dark" | "light";
+  color?: string;
+  fit?: boolean;
+  className?: string;
+}
+
 const VideoPlayer = ({
   videoUrl,
   autoplay = true,
@@ -43,88 +43,43 @@ const VideoPlayer = ({
   color = "#7c3aed",
   fit = true,
   className = "",
-}: {
-  videoUrl?: string;
-  autoplay?: boolean;
-  replay?: boolean;
-  theme?: "dark" | "light";
-  color?: string;
-  fit?: boolean;
-  className?: string;
-}) => {
+}: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const speedMenuRef = useRef<HTMLDivElement | null>(null);
 
   // State
-  const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
-  const [isEnded, setIsEnded] = React.useState<boolean>(false);
-  const [progress, setProgress] = React.useState<number>(0);
-  const [duration, setDuration] = React.useState<number>(0);
-  const [volume, setVolume] = React.useState<number>(1);
-  const [isMuted, setIsMuted] = React.useState<boolean>(false);
-  const [isFullscreen, setIsFullscreen] = React.useState<boolean>(false);
-  const [showControls, setShowControls] = React.useState<boolean>(!autoplay);
-  const [showSpeedMenu, setShowSpeedMenu] = React.useState<boolean>(false);
-  const [playbackSpeed, setPlaybackSpeed] = React.useState<number>(1);
-  const [isBuffering, setIsBuffering] = React.useState<boolean>(false);
-  const [buffered, setBuffered] = React.useState<number>(0);
-  const [isCover, setIsCover] = React.useState<boolean>(!fit);
-  const [error, setError] = React.useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isEnded, setIsEnded] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [volume, setVolume] = useState<number>(1);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(!autoplay);
+  const [showSpeedMenu, setShowSpeedMenu] = useState<boolean>(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
+  const [isBuffering, setIsBuffering] = useState<boolean>(false);
+  const [buffered, setBuffered] = useState<number>(0);
+  const [isCover, setIsCover] = useState<boolean>(!fit);
+  const [error, setError] = useState<boolean>(false);
 
   // Feedback UI State
-  const [volumeOverlay, setVolumeOverlay] = React.useState<{show:boolean;value:number}>({
+  const [volumeOverlay, setVolumeOverlay] = useState<{ show: boolean; value: number }>({
     show: false,
     value: 0,
   });
-  const [skipFeedback, setSkipFeedback] = React.useState<{show:boolean;direction: string|null;fadingOut:boolean}>({
+  const [skipFeedback, setSkipFeedback] = useState<{ show: boolean; direction: "forward" | "backward" | null; fadingOut: boolean }>({
     show: false,
     direction: null,
     fadingOut: false,
   });
 
   // Refs
-  const volumeTimeoutRef = useRef<number | null>(null);
-  const clickTimeoutRef = useRef<number | null>(null);
+  const volumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastClickTimeRef = useRef<number>(0);
-  const controlsTimeout = useRef<number | null>(null);
-
-  const videoRef = useRef(null);
-  const containerRef = useRef(null);
-  const speedMenuRef = useRef(null);
-
-  // State
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isEnded, setIsEnded] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(!autoplay);
-  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [isBuffering, setIsBuffering] = useState(false);
-  const [buffered, setBuffered] = useState(0);
-  const [isCover, setIsCover] = useState(!fit);
-  const [error, setError] = useState(false);
-
-  // Feedback UI State
-  const [volumeOverlay, setVolumeOverlay] = useState({
-    show: false,
-    value: 0,
-  });
-  const [skipFeedback, setSkipFeedback] = useState({
-    show: false,
-    direction: null,
-    fadingOut: false,
-  });
-
-  // Refs
-  const volumeTimeoutRef = useRef(null);
-  const clickTimeoutRef = useRef(null);
-  const lastClickTimeRef = useRef(0);
-  let controlsTimeout = useRef(null);
+  const controlsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // --- Theme Config ---
   const isDark = theme === "dark";
@@ -156,11 +111,10 @@ const VideoPlayer = ({
       if (playPromise !== undefined) {
         playPromise
           .then(() => setIsPlaying(true))
-          .catch((error) => {
-            console.log("Autoplay prevented:", error);
+          .catch((err) => {
+            console.log("Autoplay prevented:", err);
             setIsPlaying(false);
             setShowControls(true);
-            // Browser policy might block unmuted autoplay.
           });
       }
     }
@@ -190,7 +144,7 @@ const VideoPlayer = ({
     setIsCover(!isCover);
   };
 
-  const showVolumeFeedback = (val) => {
+  const showVolumeFeedback = (val: number) => {
     setVolumeOverlay({ show: true, value: val });
     if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
     volumeTimeoutRef.current = setTimeout(() => {
@@ -198,7 +152,7 @@ const VideoPlayer = ({
     }, 1000);
   };
 
-  const handleVolumeChange = (e, newVol = null) => {
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>, newVol: number | null = null) => {
     let vol = newVol !== null ? newVol : parseFloat(e.target.value);
     vol = Math.max(0, Math.min(1, vol));
 
@@ -223,7 +177,7 @@ const VideoPlayer = ({
     }
   };
 
-  const handleSeek = (e) => {
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!videoRef.current) return;
     const seekTime = parseFloat(e.target.value);
     videoRef.current.currentTime = seekTime;
@@ -232,16 +186,15 @@ const VideoPlayer = ({
     if (isEnded) setIsEnded(false);
   };
 
-  const skip = (seconds) => {
+  const skip = (seconds: number) => {
     if (!videoRef.current) return;
     videoRef.current.currentTime += seconds;
     if (isEnded) setIsEnded(false);
   };
 
   // --- Smart Click Handler ---
-  const handleSmartClick = (e) => {
-    // If error or no video, ignore
-    if (error || !videoUrl) return;
+  const handleSmartClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (error || !videoUrl || !containerRef.current) return;
 
     const now = Date.now();
     const timeSinceLastClick = now - lastClickTimeRef.current;
@@ -252,7 +205,7 @@ const VideoPlayer = ({
     lastClickTimeRef.current = now;
 
     if (timeSinceLastClick < 300) {
-      clearTimeout(clickTimeoutRef.current);
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
       if (x < width * 0.35) {
         skip(-10);
         triggerSkipFeedback("backward");
@@ -269,7 +222,7 @@ const VideoPlayer = ({
     }
   };
 
-  const triggerSkipFeedback = (direction) => {
+  const triggerSkipFeedback = (direction: "forward" | "backward") => {
     setSkipFeedback({ show: false, direction: null, fadingOut: false });
     setTimeout(() => {
       setSkipFeedback({ show: true, direction, fadingOut: false });
@@ -299,7 +252,7 @@ const VideoPlayer = ({
   };
 
   const onEnded = () => {
-    if (replay) {
+    if (replay && videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play();
     } else {
@@ -310,6 +263,7 @@ const VideoPlayer = ({
   };
 
   const toggleFullscreen = () => {
+    if (!containerRef.current) return;
     if (!document.fullscreenElement) {
       containerRef.current.requestFullscreen();
       setIsFullscreen(true);
@@ -326,12 +280,12 @@ const VideoPlayer = ({
       } else if (videoRef.current) {
         await videoRef.current.requestPictureInPicture();
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const changePlaybackSpeed = (speed) => {
+  const changePlaybackSpeed = (speed: number) => {
     if (videoRef.current) {
       videoRef.current.playbackRate = speed;
       setPlaybackSpeed(speed);
@@ -342,11 +296,11 @@ const VideoPlayer = ({
   // --- Effects ---
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         showSpeedMenu &&
         speedMenuRef.current &&
-        !speedMenuRef.current.contains(event.target)
+        !speedMenuRef.current.contains(event.target as Node)
       ) {
         setShowSpeedMenu(false);
       }
@@ -387,8 +341,8 @@ const VideoPlayer = ({
   }, [showSpeedMenu, isEnded, isPlaying]);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.target.tagName === "INPUT") return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === "INPUT") return;
 
       switch (e.key.toLowerCase()) {
         case " ":
@@ -440,14 +394,6 @@ const VideoPlayer = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [togglePlay]);
 
-  const getVolumeIcon = () => {
-    if (isMuted || volume === 0)
-      return <VolumeX size={20} className={themeStyles.iconBase} />;
-    if (volume < 0.5)
-      return <Volume1 size={20} className={themeStyles.iconBase} />;
-    return <Volume2 size={20} className={themeStyles.iconBase} />;
-  };
-
   // Edge Case: No URL
   if (!videoUrl) {
     return (
@@ -478,7 +424,7 @@ const VideoPlayer = ({
         className={`w-full h-full bg-black ${isCover ? "object-cover" : "object-contain"}`}
         src={videoUrl}
         onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={() => setDuration(videoRef.current.duration)}
+        onLoadedMetadata={() => videoRef.current && setDuration(videoRef.current.duration)}
         onWaiting={() => setIsBuffering(true)}
         onCanPlay={() => setIsBuffering(false)}
         onPlay={() => setIsPlaying(true)}
@@ -590,7 +536,6 @@ const VideoPlayer = ({
                 style={{ backgroundColor: color }}
               >
                 {isEnded ? (
-                  // <RotateCcw size={20} fill="white" className="text-white sm:w-6 sm:h-6 group-hover/replay:rotate-180 transition-transform duration-500" />
                   <RotateCw
                     size={20}
                     fill="none"
@@ -666,7 +611,7 @@ const VideoPlayer = ({
             <div
               className="absolute top-0 left-0 h-full rounded-full pointer-events-none z-10"
               style={{
-                width: `${(progress / duration) * 100}%`,
+                width: `${(progress / (duration || 1)) * 100}%`,
                 backgroundColor: color,
               }}
             >
@@ -756,7 +701,7 @@ const VideoPlayer = ({
                     step="0.05"
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="w-full h-1 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                    className="w-full h-1 rounded-lg appearance-none cursor-pointer"
                     style={{
                       background: `linear-gradient(to right, ${color} ${volume * 100}%, ${isDark ? "#404040" : "#d1d5db"} ${volume * 100}%)`,
                     }}

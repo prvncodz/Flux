@@ -1,4 +1,9 @@
-const PlayIcon = ({ size = 24, color = "currentColor" }) => (
+interface PlayIconProps {
+  size?: number | string;
+  color?: string;
+}
+
+const PlayIcon = ({ size = 24, color = "currentColor" }: PlayIconProps) => (
   <svg
     width={size}
     height={size}

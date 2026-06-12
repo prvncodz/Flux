@@ -1,25 +1,37 @@
-
 import defaultBanner from "../assets/dbanner.jpg";
-import { useState, useRef, useContext } from "react";
+import { useState, useRef } from "react";
 import SubmitButton from "../submitButton";
 import axios from "../../api/axios";
 import PopUpComponent from "../uploadPopup/popupComponent";
-import { CameraIcon, ImageIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
+import { Video } from "../../types/video.types";
+import React from "react";
 
-export default function EditVideoPopup({ setIsEditPopUpActive, video, setShowUpdated, setShowUpdateError }) {
-    const [thumbnailPreview, setThumbnailPreview] = useState(null);
-    const fileRefci = useRef(null);
-    const [loading, SetLoading] = useState(false);
-    const [isSubmmited, setIsSubmmited] = useState(false);
-    const [titleInput, setTitleInput] = useState(video?.title || "");
-    const [descriptionInput, setDescriptionInput] = useState(video?.description || "")
+export default function EditVideoPopup({
+    setIsEditPopUpActive,
+    video,
+    setShowUpdated,
+    setShowUpdateError
+}: {
+    setIsEditPopUpActive: (b: boolean) => void;
+    video: Video;
+    setShowUpdated: (b: boolean) => void;
+    setShowUpdateError: (b: boolean) => void;
+}) {
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+    const fileRefci = useRef<HTMLInputElement | null>(null);
+    const [loading, SetLoading] = useState<boolean>(false);
+    const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
+    const [titleInput, setTitleInput] = useState<string>(video?.title || "");
+    const [descriptionInput, setDescriptionInput] = useState<string>(video?.description || "")
 
-    async function handleFormSubmission(e) {
+    async function handleFormSubmission(e: React.FormEvent<HTMLFormElement>) {
         SetLoading(true);
         e.preventDefault();
-        const formData = new FormData(e.target);
+        const form = e.currentTarget;
+        const formData = new FormData(form);
 
-        async function updateVideo(videoId) {
+        async function updateVideo(videoId: string) {
             try {
                 const res = await axios.patch(
                     `/videos/c/${videoId}/update-video`,
@@ -37,23 +49,25 @@ export default function EditVideoPopup({ setIsEditPopUpActive, video, setShowUpd
                 }
             } catch (error) {
                 setShowUpdateError(true);
-                e.target.reset();
+                form.reset();
             } finally {
                 SetLoading(false);
             }
         }
-        updateVideo(video?._id);
+        if (video?._id) {
+            updateVideo(video._id);
+        }
         setThumbnailPreview(null);
         setIsSubmmited(true);
-        e.target.reset();
+        form.reset();
         setTimeout(() => {
             setIsSubmmited(false);
             setIsEditPopUpActive(false);
         }, 1000);
     }
 
-    function handleThumbnail(e) {
-        const file = e.target.files[0];
+    function handleThumbnail(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
         if (file) {
             setThumbnailPreview(URL.createObjectURL(file));
         }
@@ -80,9 +94,9 @@ export default function EditVideoPopup({ setIsEditPopUpActive, video, setShowUpd
                                         : defaultBanner
                             }
                             onClick={() => {
-                                fileRefci.current.click();
+                                fileRefci.current?.click();
                             }}
-                            onError={(e) => (e.target.src = dbanner)}
+                            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => (e.currentTarget.src = defaultBanner)}
                             className="h-33
                 w-full rounded-lg relative cursor-pointer md:h-53"
                             loading="lazy"
@@ -90,7 +104,7 @@ export default function EditVideoPopup({ setIsEditPopUpActive, video, setShowUpd
 
                         <div
                             className="absolute z-2 bg-black/50 h-full w-full rounded-lg
-                  cursor-pointer top-0 flex items-center justify-center" onClick={() => fileRefci.current.click()}
+                  cursor-pointer top-0 flex items-center justify-center" onClick={() => fileRefci.current?.click()}
                         >
                             <ImageIcon className="text-gray-300" />
                             <div className="text-gray-300 ml-2 text-sm" >Video thumbnail </div>
@@ -123,21 +137,18 @@ export default function EditVideoPopup({ setIsEditPopUpActive, video, setShowUpd
                             onChange={(e) => {
                                 setTitleInput(e.target.value);
                             }}
-                            onError={(e) => (e.target.value = video.title)}
                         />
                     </label>
                     <label className="text-base font-medium text-gray-700">
                         Description
                         <textarea
                             name="description"
-                            type="text"
                             className="bg-gray-100 w-full  h-35 mb-4 rounded-md p-2 border
                 border-gray-200 shadow-xs mt-1 md:p-3 font-normal text-sm"
                             value={descriptionInput}
                             onChange={(e) => {
                                 setDescriptionInput(e.target.value);
                             }}
-                            onError={(e) => (e.target.value = video?.description)}
                         />
                     </label>
                 </div>
@@ -161,4 +172,3 @@ export default function EditVideoPopup({ setIsEditPopUpActive, video, setShowUpd
         </PopUpComponent>
     );
 }
-

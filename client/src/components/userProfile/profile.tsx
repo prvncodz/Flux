@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "../../api/axios";
 import UserTick from "../assets/usertick";
 import UserAddIcon from "../assets/useradd";
@@ -10,29 +10,29 @@ import PostFeed from "../home/tweetfeed/tweetFeed";
 import PlaylistFeed from "../home/playlistfeed/playlistFeed";
 import EditProfilePopUp from "./editProfilePopup";
 import ChangePassPopup from "./changePass";
-import { useLocation, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Ellipsis, LucideDotSquare, Pen, UserRoundKey } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { ArrowLeftIcon, Ellipsis, Pen, UserRoundKey } from "lucide-react";
 import SignInBanner from "../signinInstructPopup";
 import { motion } from "motion/react"
 import useUserStore from "../../stores/user.store";
+import { User } from "../../types/user.types";
 
-import React from "react";
 export default function Profile() {
 
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
-    const [UserProfile, setUserProfile] = React.useState<any>({});
-    const [tabOpened, setTabOpened] = React.useState<string>("videos");
-    const [showElipse, setShowElipse] = React.useState<boolean>(false);
-    const [isPopupActive, setisPopupActive] = React.useState<boolean>(false);
-    const [isEditPopUpActive, setIsEditPopUpActive] = React.useState<boolean>(false);
-    const [isPassPopupActive, setIsPassPopupActive] = React.useState<boolean>(false);
-    const [isOtherUserP, setIsOtherUserP] = React.useState<boolean>(false);
+    const [UserProfile, setUserProfile] = useState<User>({});
+    const [tabOpened, setTabOpened] = useState<"videos" | "posts" | "playlists" | string>("videos");
+    const [showElipse, setShowElipse] = useState<boolean>(false);
+    const [isPopupActive, setisPopupActive] = useState<boolean>(false);
+    const [isEditPopUpActive, setIsEditPopUpActive] = useState<boolean>(false);
+    const [isPassPopupActive, setIsPassPopupActive] = useState<boolean>(false);
+    const [isOtherUserP, setIsOtherUserP] = useState<boolean>(false);
     const { username } = useParams();
-    const [isSubscribed, setIsSubscribed] = React.useState<boolean>(false);
-    const [isProfileFetched, setIsProfileFetched] = React.useState<boolean>(false);
-    const [signinInstruction, setSigninInstruction] = React.useState<boolean>(false);
-    let timeoutId: number | undefined;
+    const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+    const [isProfileFetched, setIsProfileFetched] = useState<boolean>(false);
+    const [signinInstruction, setSigninInstruction] = useState<boolean>(false);
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     async function handleSubscription() {
         clearTimeout(timeoutId);
@@ -44,7 +44,7 @@ export default function Profile() {
         timeoutId = setTimeout(async () => {
             try {
                 await axios.post(`/subscriptions/c/${UserProfile?._id}`);
-            } catch (error) {
+            } catch (error: any) {
                 console.log(error);
                 console.log(error.response?.data?.message);
             }
@@ -54,10 +54,10 @@ export default function Profile() {
         if (username !== user?.userName) {
             setIsOtherUserP(true);
             setShowElipse(false);
-            async function getUserProfile(username) {
-                if (!username) return;
+            async function getUserProfile(u: string) {
+                if (!u) return;
                 try {
-                    const res = await axios.get(`/user/p/${username}`);
+                    const res = await axios.get(`/user/p/${u}`);
                     if (res.status === 200) {
                         setUserProfile(res.data?.data);
                         setIsSubscribed(res.data?.data?.isSubscribed);
@@ -70,13 +70,13 @@ export default function Profile() {
                     );
                 }
             }
-            getUserProfile(username);
+            if (username) getUserProfile(username);
         } else {
             setShowElipse(true);
-            async function getUserProfile(username) {
-                if (!username) return;
+            async function getUserProfile(u?: string) {
+                if (!u) return;
                 try {
-                    const res = await axios.get(`/user/p/${username}`);
+                    const res = await axios.get(`/user/p/${u}`);
                     if (res.status === 200) {
                         setUserProfile(res.data?.data);
                         setIsProfileFetched(true);
@@ -88,14 +88,14 @@ export default function Profile() {
                     );
                 }
             }
-            getUserProfile(user?.userName);
+            if (user?.userName) getUserProfile(user.userName);
         }
     }, [user?.userName, username]);
 
-    const tabs = {
+    const tabs: Record<string, React.ReactNode> = {
         videos: <VideoFeed fetchType={"user"} userId={UserProfile?._id} />,
         posts: <PostFeed fetchType={"user"} userId={UserProfile?._id} />,
-        playlists: <PlaylistFeed userId={UserProfile?._id} />,
+        playlists: <PlaylistFeed userId={UserProfile?._id || ""} />,
     };
 
     return (
@@ -106,8 +106,8 @@ export default function Profile() {
             }}
             animate={{
                 opacity: 1,
-                duration: 100
             }}
+            transition={{ duration: 0.1 }}
             exit={{
                 opacity: 0
             }}
@@ -164,13 +164,13 @@ export default function Profile() {
             <div className="relative h-45 z-0 md:h-60 lg:h-90">
                 <img
                     src={UserProfile?.coverImage?.url || dbanner}
-                    onError={(e) => (e.target.src = dbanner)}
+                    onError={(e: any) => (e.target.src = dbanner)}
                     className="h-full w-full relative"
                     loading="lazy"
                 />
                 <img
                     src={UserProfile?.avatar?.url || dpfp}
-                    onError={(e) => (e.target.src = dpfp)}
+                    onError={(e: any) => (e.target.src = dpfp)}
                     className="h-20 rounded-full absolute left-1 -bottom-15 w-20 border-2 border-white md:h-25 md:w-25 md:left-8 lg:h-30 lg:w-30 "
                     loading="lazy"
                 />
@@ -217,7 +217,6 @@ export default function Profile() {
                 className={`flex flex-row w-full ${isOtherUserP ? `mt-4 md:mt-6` : `mt-3 md:mt-6`} pb-2 justify-center`}
             >
                 <div
-                    name="videos"
                     className={`text-base relative mt-3.5 font-normal w-50 cursor-pointer text-center ${tabOpened === "videos" ? `text-[#1E549D]` : `text-gray-800 `}`}
                     onClick={() => setTabOpened("videos")}
                 >
@@ -227,7 +226,6 @@ export default function Profile() {
                     ></div>
                 </div>
                 <div
-                    name="posts"
                     className={`text-base relative mt-3.5 font-normal w-50 cursor-pointer text-center ${tabOpened === "posts" ? `text-[#1E549D]` : `text-gray-800 `}`}
                     onClick={() => setTabOpened("posts")}
                 >
@@ -237,7 +235,6 @@ export default function Profile() {
                     ></div>
                 </div>
                 <div
-                    name="playlists"
                     className={`text-base relative mt-3.5 font-normal w-50 cursor-pointer text-center ${tabOpened === "playlists" ? `text-[#1E549D]` : `text-gray-800 `}`}
                     onClick={() => setTabOpened("playlists")}
                 >

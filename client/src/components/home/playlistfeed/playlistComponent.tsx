@@ -1,19 +1,26 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useEffect, useContext } from "react";
 import dpfp from "../../assets/dpfp.jpg";
 import dbanner from "../../assets/dbanner.jpg";
 import PlaylistIcon from "../../assets/playlistIcon";
 import { useNavigate } from "react-router-dom";
 import UserPlaylistcontext from "../../../contexts/userPlaylistContext";
+import { Playlist } from "../../../types/playlist.types";
+import { User } from "../../../types/user.types";
 
 export default function PlaylistComponent({
 	playlist,
 	idx,
 	playlistsLength,
 	setLoading,
+}: {
+	playlist: Playlist;
+	idx: number;
+	playlistsLength: number;
+	setLoading: (b: boolean) => void;
 }) {
-	const { avatar, fullName ,userName} = playlist?.owner;
+	const ownerData = playlist?.owner as User;
+	const { avatar, fullName, userName } = ownerData || {};
 	const { owner } = useContext(UserPlaylistcontext);
-	const [videos] = useState(playlist?.videos || []);
 	const navigate = useNavigate();
 
 	function hanldeShowPlaylistPage() {
@@ -23,7 +30,7 @@ export default function PlaylistComponent({
 				name: playlist?.name,
 				avatarUrl: avatar?.url,
 				fullname: fullName,
-				username:userName,
+				username: userName,
 				owner
 			},
 		});
@@ -32,7 +39,7 @@ export default function PlaylistComponent({
 		if (idx === playlistsLength - 1) {
 			setLoading(false);
 		}
-	}, []);
+	}, [idx, playlistsLength, setLoading]);
 	return (
 		<div
 			className="mb-3  w-full aspect-video max-w-100 md:max-w-190 lg:max-w-400  "
@@ -40,13 +47,13 @@ export default function PlaylistComponent({
 		>
 			<div className="relative">
 				<img
-					src={videos[0]?.thumbnail?.url || dbanner}
+					src={playlist?.videos?.[0]?.thumbnail?.url || dbanner}
 					className=" w-full h-60 rounded-2xl z-0"
-					onError={(e) => (e.target.src = dbanner)}
+					onError={(e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = dbanner)}
 				/>
 				<div className="absolute  bottom-2 p-2 right-2  rounded-xl text-center text-neutral-300 bg-gray-900 text-sm font-medium z-1 flex">
 					<PlaylistIcon size={18} />{" "}
-					<span className="mr-0.5 ml-1">{videos[0] ? videos.length : 0}</span>
+					<span className="mr-0.5 ml-1">{playlist?.videos?.[0] ? playlist.videos.length : 0}</span>
 					videos
 				</div>
 			</div>
@@ -56,7 +63,7 @@ export default function PlaylistComponent({
 						src={avatar?.url || dpfp}
 						className="rounded-full h-10 w-10"
 						loading="lazy"
-						onError={(e) => (e.target.src = dpfp)}
+						onError={(e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = dpfp)}
 					/>
 				</div>
 				<span className="ml-4">

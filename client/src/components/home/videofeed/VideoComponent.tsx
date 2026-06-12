@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import type { Video } from "../../../types";
+import type { Video } from "../../../types/video.types";
 import dpfp from "../../assets/dpfp.jpg";
 import { useNavigate } from "react-router-dom";
+import { User } from "../../../types/user.types";
 
 export default function VideoComponent({
     video,
@@ -9,12 +10,13 @@ export default function VideoComponent({
     videosLength,
     setLoading,
 }: {
-    video?: Video;
+    video: Video;
     idx: number;
     videosLength: number;
     setLoading: (b: boolean) => void;
 }) {
-    const { avatar, userName, fullName } = (video?.owner ?? {}) as { avatar?: { url?: string }; userName?: string; fullName?: string };
+    const ownerData = video?.owner as User;
+    const { avatar, userName, fullName } = ownerData || {};
     const [duration, setDuration] = useState<string>("00:00");
     const [timeOfUpload, setTimeOfUpload] = useState<string>("1 day");
     const navigate = useNavigate();
@@ -35,11 +37,11 @@ export default function VideoComponent({
         if (idx === videosLength - 1) {
             setLoading(false);
         }
-    }, [videosLength]);
+    }, [idx, videosLength, setLoading]);
 
     useEffect(() => {
-        function calcDuration(dur) {
-            if (!dur) return;
+        function calcDuration(dur?: number) {
+            if (dur === undefined) return;
             const hours = Math.trunc(dur / 3600);
             const minutes = Math.trunc((dur % 3600) / 60);
             const seconds = Math.trunc((dur % 3600) % 60);
@@ -56,7 +58,7 @@ export default function VideoComponent({
                 setDuration(`00:${String(seconds).padStart(2, "0")}`);
             }
         }
-        function calcTimeOfUpload(t) {
+        function calcTimeOfUpload(t?: string) {
             if (!t) return;
             const now = new Date();
             const dif = now.getTime() - new Date(t).getTime();
@@ -82,8 +84,10 @@ export default function VideoComponent({
             }
         }
         calcTimeOfUpload(video.createdAt);
-        calcDuration(Math.trunc(video.duration));
-    }, []);
+        if (video.duration !== undefined) {
+            calcDuration(Math.trunc(video.duration));
+        }
+    }, [video.createdAt, video.duration]);
 
     return (
         <div className="md:p-2 lg:p-2">
@@ -92,7 +96,7 @@ export default function VideoComponent({
                 onClick={handleShowWatchVideo}
             >
                 <img
-                    src={video.thumbnail.url}
+                    src={video.thumbnail?.url}
                     className=" w-full h-full md:rounded-lg"
                 />
                 <div className="absolute right-2 bottom-2 p-2 z-1 rounded-xl text-center text-neutral-300 bg-gray-900 text-sm font-medium subpixel-antialiased">
@@ -103,11 +107,10 @@ export default function VideoComponent({
                 <div className="h-10 w-10 shrink-0">
                     <img
                         src={avatar?.url || dpfp}
-                        name="Userprofile"
                         className="rounded-full h-full w-full cursor-pointer"
                         loading="lazy"
                         onClick={handleShowUserProfile}
-                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => ((e.target as HTMLImageElement).src = dpfp)}
+                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = dpfp)}
                     />
                 </div>
                 <div className="ml-4">

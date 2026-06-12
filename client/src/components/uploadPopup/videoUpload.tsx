@@ -1,19 +1,22 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import PopUpComponent from "./popupComponent";
 import SubmitButton from "../submitButton";
 import axios from "../../api/axios";
 
-export default function VideoUploadPopup({ setShowPopup }) {
-	const [loading, SetLoading] = useState(false);
-	const [isSubmmited, setIsSubmmited] = useState(false);
-	const [fileName, setFileName] = useState("Select video file to upload");
-	function handleVideoFile(fname) {
-		setFileName(fname);
+export default function VideoUploadPopup({ setShowPopup }: { setShowPopup: (b: boolean) => void }) {
+	const [loading, SetLoading] = useState<boolean>(false);
+	const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
+	const [fileName, setFileName] = useState<string>("Select video file to upload");
+	
+	function handleVideoFile(fname?: string) {
+		if (fname) setFileName(fname);
 	}
-	async function handleVideoUpload(e) {
+	
+	async function handleVideoUpload(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
+		const form = e.currentTarget;
 		SetLoading(true);
-		const formdata = new FormData(e.target);
+		const formdata = new FormData(form);
 		try {
 			await axios.post("videos/publish-video", formdata, {
 				headers: {
@@ -58,7 +61,7 @@ export default function VideoUploadPopup({ setShowPopup }) {
 							<input
 								type="file"
 								name="videofile"
-								onChange={(e) => handleVideoFile(e.target?.files[0]?.name)}
+								onChange={(e) => handleVideoFile(e.target?.files?.[0]?.name)}
 								className="hidden"
 								id="for-upload"
 							/>
@@ -90,7 +93,6 @@ export default function VideoUploadPopup({ setShowPopup }) {
 							Description
 							<textarea
 								name="description"
-								type="text"
 								className="bg-gray-100
                 h-30 w-full p-2 border border-gray-200 text-sm rounded-lg"
 							/>

@@ -1,29 +1,28 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "../../../api/axios";
 import PlaylistComponent from "./playlistComponent";
-import { Loader2 } from "lucide-react";
 import UserPlaylistContext from "../../../contexts/userPlaylistContext"
+import { Playlist } from "../../../types/playlist.types";
 
-export default function PlaylistFeed({ userId }) {
-    const [playlists, setPlaylists] = useState([]);
-    const [arePlaylistsFetched, SetArePlaylistsFetched] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasNoMore, setHasNoMore] = useState(false);
-    const ref = useRef(null);
-    const [error, setError] = useState(false);
+export default function PlaylistFeed({ userId }: { userId: string }) {
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [arePlaylistsFetched, SetArePlaylistsFetched] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [page, setPage] = useState<number>(1);
+    const [hasNoMore, setHasNoMore] = useState<boolean>(false);
+    const ref = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const el = ref.current;
         function handleScroll() {
-            if (loading || hasNoMore) return;
+            if (loading || hasNoMore || !el) return;
             if (el.scrollTop + el.clientHeight >= el.scrollHeight) {
                 setPage((prev) => prev + 1);
             }
         }
         el?.addEventListener("scroll", handleScroll);
         return () => el?.removeEventListener("scroll", handleScroll);
-    });
+    }, [loading, hasNoMore]);
 
     useEffect(() => {
         if (loading) return;
@@ -31,21 +30,22 @@ export default function PlaylistFeed({ userId }) {
 
         const controller = new AbortController();
         const signal = controller.signal;
-        async function fetchAllPlaylists(Id) {
+        async function fetchAllPlaylists(Id: string) {
             if (!Id) return;
             try {
-                await axios
-                    .get(`/playlists/user/${Id}?page=${page}`, { signal })
-                    .then((res) => {
-                        if (res.data.data.length == 0) {
-                            setHasNoMore(true);
-                            setLoading(false);
-                        }
-                        setPlaylists((prev) => [...prev, ...res.data?.data]);
-                        SetArePlaylistsFetched(true);
-                    });
-            } catch (error) {
-                console.log(error);
+                const res = await axios.get(`/playlists/user/${Id}?page=${page}`, { signal });
+                if (res.data.data.length == 0) {
+                    setHasNoMore(true);
+                } else {
+                    setPlaylists((prev) => [...prev, ...res.data?.data]);
+                    SetArePlaylistsFetched(true);
+                }
+            } catch (error: any) {
+                if (error.name !== 'CanceledError') {
+                    console.log(error);
+                }
+            } finally {
+                setLoading(false);
             }
         }
         fetchAllPlaylists(userId);
@@ -55,7 +55,7 @@ export default function PlaylistFeed({ userId }) {
         };
     }, [userId, page]);
 
-    if ((arePlaylistsFetched && playlists.length === 0) || error) {
+    if ((arePlaylistsFetched && playlists.length === 0)) {
         return (
             <div className="flex h-100 w-full justify-center items-center text-base font-medium ">
                 No Playlist has been published by this user

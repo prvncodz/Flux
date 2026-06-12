@@ -1,15 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 
+interface VideoDescriptionProps {
+  content?: string;
+  views?: number | string;
+  uploadTime?: string;
+  showVideoDetails?: boolean;
+}
+
 export default function VideoDescription({
   content,
   views,
   uploadTime,
   showVideoDetails,
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [timeOfUpload, setTimeOfUpload] = useState(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const ref = useRef(null);
+}: VideoDescriptionProps) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [timeOfUpload, setTimeOfUpload] = useState<string | null>(null);
+  const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const e = ref.current;
@@ -19,7 +26,7 @@ export default function VideoDescription({
       );
     }
 
-    function calcTimeOfUpload(t) {
+    function calcTimeOfUpload(t?: string) {
       if (!t) return;
       const now = new Date();
       const dif = now.getTime() - new Date(t).getTime();

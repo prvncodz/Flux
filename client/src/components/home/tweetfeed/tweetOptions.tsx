@@ -1,16 +1,25 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SubmitButton from "../../submitButton";
 import PopUpComponent from "../../uploadPopup/popupComponent";
 import dpfp from "../../assets/dpfp.jpg"
 import axios from "../../../api/axios";
+import { Comment as Tweet } from "../../../types/comment.types";
 
-const EditPost = ({ setShowPopup, tweet, fullname, username, avatarUrl }) => {
+interface EditPostProps {
+	setShowPopup: (b: boolean) => void;
+	tweet: Tweet;
+	fullname?: string;
+	username?: string;
+	avatarUrl?: string;
+}
 
-	const [loading, SetLoading] = useState(false);
-	const [isSubmmited, setIsSubmmited] = useState(false);
-	const [content, setContent] = useState(tweet?.content || "");
+const EditPost = ({ setShowPopup, tweet, fullname, username, avatarUrl }: EditPostProps) => {
 
-	async function handleEditPost(e) {
+	const [loading, SetLoading] = useState<boolean>(false);
+	const [isSubmmited, setIsSubmmited] = useState<boolean>(false);
+	const [content, setContent] = useState<string>(tweet?.content || "");
+
+	async function handleEditPost(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		SetLoading(true);
 
@@ -47,7 +56,7 @@ const EditPost = ({ setShowPopup, tweet, fullname, username, avatarUrl }) => {
 						<img
 							src={avatarUrl || dpfp}
 							className="rounded-full h-10 w-10"
-							onError={(e) => (e.target.src = dpfp)}
+							onError={(e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = dpfp)}
 						/>
 					</div>
 					<span className="ml-4 h-7">
@@ -62,7 +71,6 @@ const EditPost = ({ setShowPopup, tweet, fullname, username, avatarUrl }) => {
 				<label className="text-md font-base text-gray-700 ">
 					<textarea
 						name="content"
-						type="text"
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 						placeholder="The weather is beautifull..."
@@ -91,16 +99,23 @@ const EditPost = ({ setShowPopup, tweet, fullname, username, avatarUrl }) => {
 		</PopUpComponent>
 	);
 }
-const DeletePost = ({ isOpen, onClose, tweetId }) => {
+
+interface DeletePostProps {
+	isOpen: boolean;
+	onClose: () => void;
+	tweetId?: string;
+}
+
+const DeletePost = ({ isOpen, onClose, tweetId }: DeletePostProps) => {
 	// Close on Escape
 	useEffect(() => {
-		const onKey = (e) => { if (e.key === "Escape") onClose(); };
+		const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
 		if (isOpen) window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
 	}, [isOpen, onClose]);
 
 	if (!isOpen) return null;
-	async function handleDeletePost(Id) {
+	async function handleDeletePost(Id?: string) {
 		if (!Id) return;
 		try {
 			const res = await axios.delete(`/tweets/${Id}/delete-tweet`)

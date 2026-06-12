@@ -1,7 +1,7 @@
 import logo from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import { useNavigate } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "../../api/axios";
 import dpfp from "../assets/dpfp.jpg";
 import VideoUploadPopup from "../uploadPopup/videoUpload";
@@ -22,43 +22,41 @@ import CreatePlaylistPopup from "./playlistfeed/CreatePlaylistPopup";
 import { motion } from "motion/react"
 import useTab from "../../stores/tab.store";
 import useUserStore from "../../stores/user.store";
-
 import React from "react";
-export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; searchType?: string; }) {
+
+export default function Nav({ searchType }: { wantTabs?: boolean; searchType?: string; }) {
     const navigate = useNavigate();
-    const [isActive, setIsActive] = useState(false);
-    const [notLoggedOut, setNotLoggedOut] = useState(true);
+    const [isActive, setIsActive] = useState<boolean>(false);
+    const [notLoggedOut, setNotLoggedOut] = useState<boolean>(true);
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
     const setIsUserLogged = useUserStore(s => s.setIsUserLogged);
-    const [avatar, setAvatar] = useState(null);
-    const [fullname, setFullname] = useState("Jhon Doe");
-    const [username, setUsername] = useState("jdoejr");
-    const [isCrtBtnActive, setIsCrtBtnActive] = useState(false);
-    const [popupType, setPopupType] = useState("video");
-    const [showPopup, setShowPopup] = useState(false);
-    const [isSearchFieldOpen, setIsSearchFieldOpen] = useState(false);
-    const [searchInput, setSearchInput] = useState("");
-    const [isMenuOpen, setIsMenuOPen] = useState(false);
-    const [signinInstruction, setSigninInstruction] = useState(false);
+    const [avatar, setAvatar] = useState<string | null | undefined>(null);
+    const [fullname, setFullname] = useState<string>("Jhon Doe");
+    const [username, setUsername] = useState<string>("jdoejr");
+    const [isCrtBtnActive, setIsCrtBtnActive] = useState<boolean>(false);
+    const [popupType, setPopupType] = useState<"video" | "post" | "playlist" | string>("video");
+    const [showPopup, setShowPopup] = useState<boolean>(false);
+    const [isSearchFieldOpen, setIsSearchFieldOpen] = useState<boolean>(false);
+    const [searchInput, setSearchInput] = useState<string>("");
+    const [isMenuOpen, setIsMenuOPen] = useState<boolean>(false);
+    const [signinInstruction, setSigninInstruction] = useState<boolean>(false);
     const currentPage = useTab(s => s.tab) || {}
-    const popup = {
+    
+    const popup: Record<string, React.ReactNode> = {
         video: <VideoUploadPopup setShowPopup={setShowPopup} />,
         post: <PostUploadPopup setShowPopup={setShowPopup} />,
         playlist: <CreatePlaylistPopup setShowPopup={setShowPopup} />
     };
 
     useEffect(() => {
-        if (isUserLogged && notLoggedOut) {
-            setFullname(user?.fullName);
-            setUsername(user?.userName);
-            setAvatar(user?.avatar?.url);
+        if (isUserLogged && notLoggedOut && user) {
+            setFullname(user.fullName || "Jhon Doe");
+            setUsername(user.userName || "jdoejr");
+            setAvatar(user.avatar?.url);
         }
     }, [
         user,
-        user?.fullName,
-        user?.userName,
-        user?.avatar?.url,
         isUserLogged,
         notLoggedOut,
     ]);
@@ -78,16 +76,10 @@ export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; sear
         }
     }
 
-    function handleUpload(fetchtype) {
+    function handleUpload(fetchtype: string) {
         setIsCrtBtnActive(false);
         setShowPopup(true);
-        if (fetchtype === "video") {
-            setPopupType("video");
-        } else if (fetchtype === "post") {
-            setPopupType("post");
-        } else {
-            setPopupType("playlist");
-        }
+        setPopupType(fetchtype);
     }
 
     function handleSearch() {
@@ -266,21 +258,21 @@ export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; sear
                                                 showPopup &&
                                                 popup[
                                                 popupType
-                                                ] /*if show popup is true show the popup with popupType which is defined when one of the options to create is clicked*/
+                                                ] 
                                             }
 
                                             {isUserLogged &&
-                                                notLoggedOut /*if user is logged in do this else show empty profileIcon*/ ? (
+                                                notLoggedOut ? (
                                                 <>
                                                     <div
                                                         className=" flex justify-center relative h-10 w-10 items-center active:scale-95 cursor-pointer"
                                                         onClick={() => {
-                                                            isActive ? setIsActive(false) : setIsActive(true);
+                                                            setIsActive(!isActive);
                                                         }}
                                                     >
                                                         <img
                                                             src={avatar || dpfp}
-                                                            onError={(e) => (e.target.src = dpfp)}
+                                                            onError={(e: any) => (e.target.src = dpfp)}
                                                             className="h-full w-full rounded-full shadow-sm"
                                                             loading="lazy"
                                                         />
@@ -294,8 +286,8 @@ export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; sear
                                                                 }}
                                                                 animate={{
                                                                     opacity: 1,
-                                                                    duration: 100
                                                                 }}
+                                                                transition={{ duration: 0.1 }}
                                                                 exit={{
                                                                     opacity: 0
                                                                 }}
@@ -305,7 +297,7 @@ export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; sear
                                                                     <div className=" relative flex w-full mb-2">
                                                                         <img
                                                                             src={avatar || dpfp}
-                                                                            onError={(e) => (e.target.src = dpfp)}
+                                                                            onError={(e: any) => (e.target.src = dpfp)}
                                                                             className="h-11 w-11 rounded-full relative mr-3 ml-2 left-0"
                                                                             loading="lazy"
                                                                         />
@@ -395,20 +387,20 @@ export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; sear
                         showPopup &&
                         popup[
                         popupType
-                        ] /*if show popup is true show the popup with popupType which is defined when one of the options to create is clicked*/
+                        ] 
                     }
                     {isUserLogged &&
-                        notLoggedOut /*if user is logged in do this else show empty profileIcon*/ ? (
+                        notLoggedOut ? (
                         <>
                             <div
                                 className=" flex justify-center relative items-center active:scale-95 cursor-pointer"
                                 onClick={() => {
-                                    isActive ? setIsActive(false) : setIsActive(true);
+                                    setIsActive(!isActive);
                                 }}
                             >
                                 <img
                                     src={avatar || dpfp}
-                                    onError={(e) => (e.target.src = dpfp)}
+                                    onError={(e: any) => (e.target.src = dpfp)}
                                     className="h-10 w-10 rounded-full shadow-sm"
                                     loading="lazy"
                                 />
@@ -420,7 +412,7 @@ export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; sear
                                             <div className=" relative flex w-full mb-2">
                                                 <img
                                                     src={avatar || dpfp}
-                                                    onError={(e) => (e.target.src = dpfp)}
+                                                    onError={(e: any) => (e.target.src = dpfp)}
                                                     className="h-11 w-11 rounded-full relative mr-3 ml-2 left-0"
                                                     loading="lazy"
                                                 />

@@ -22,5 +22,6 @@ export interface Video {
   };
   views?: number;
   isLiked?: boolean;
+  isPublished?: boolean;
   color?: string; // used in some UI placeholders
 }

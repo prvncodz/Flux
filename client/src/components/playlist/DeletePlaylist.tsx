@@ -1,9 +1,16 @@
 import { useEffect } from "react";
 
-export default function DeletePlaylistModal({ isOpen, onClose, onConfirm, playlistName }) {
+interface DeletePlaylistModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	onConfirm?: () => void;
+	playlistName?: string;
+}
+
+export default function DeletePlaylistModal({ isOpen, onClose, onConfirm, playlistName }: DeletePlaylistModalProps) {
 	// Close on Escape
 	useEffect(() => {
-		const onKey = (e) => { if (e.key === "Escape") onClose(); };
+		const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
 		if (isOpen) window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
 	}, [isOpen, onClose]);
@@ -54,5 +61,3 @@ export default function DeletePlaylistModal({ isOpen, onClose, onConfirm, playli
 		</div>
 	);
 }
-
-

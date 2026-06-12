@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
-import React from "react";
 export default function SignInBanner({ setShowPopup }: { setShowPopup: (b: boolean) => void; }) {
   useEffect(() => {}, []);
   return (

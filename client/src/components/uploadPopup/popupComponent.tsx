@@ -10,8 +10,8 @@ export default function PopUpComponent({ children, onCancel }: { children?: Reac
             }}
             animate={{
                 opacity: 1,
-                duration: 100
             }}
+            transition={{ duration: 0.1 }}
             exit={{
                 opacity: 0
             }}
@@ -21,7 +21,7 @@ export default function PopUpComponent({ children, onCancel }: { children?: Reac
         >
             <div
                 className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-                onClick={(e) => e.target === e.currentTarget && onCancel()}
+                onClick={(e) => e.target === e.currentTarget && onCancel?.()}
             >
 
                 <CancelIconComponent onClick={onCancel} />

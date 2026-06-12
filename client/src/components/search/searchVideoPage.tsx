@@ -1,17 +1,17 @@
+import React, { useEffect, useState } from "react";
 import { ArrowLeft, Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Feed from "../home/videofeed/feed";
 
 const SearchVideoPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const searchQuery = searchParams.get("query");
 	const navigate = useNavigate();
-	const [searchInput, setSearchInput] = useState(searchQuery || "");
+	const [searchInput, setSearchInput] = useState<string>(searchQuery || "");
 
 	useEffect(() => {
-		setSearchInput(searchQuery);
-	}, [searchParams]);
+		setSearchInput(searchQuery || "");
+	}, [searchParams, searchQuery]);
 
 	function handleSearch() {
 		setSearchParams({ query: searchInput })
@@ -32,19 +32,19 @@ const SearchVideoPage = () => {
 							name="query"
 							placeholder="Search on flux"
 							className="h-full w-full placeholder:text-gray-500 text-gray-700 pl-9 pr-5 flex flex-start focus:outline-none"
-							onKeyDown={(e) => {
+							onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
 								if (e.key == "Enter") {
-									e.target.blur();
+									e.currentTarget.blur();
 									handleSearch();
 								}
 							}}
 							value={searchInput}
-							onChange={(e) => setSearchInput(e.target.value)}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
 						/>
 						<div
 							className="h-10 w-18 rounded-4xl bg-gray-100 flex items-center justify-center flex-end"
-							onClick={(e) => {
-								e.target.blur();
+							onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+								(e.currentTarget.previousSibling as HTMLInputElement)?.blur();
 								handleSearch();
 							}}
 						>
@@ -52,7 +52,7 @@ const SearchVideoPage = () => {
 						</div>
 					</div>
 				</div>
-				<Feed fetchType={"search"} searchQuery={searchQuery} />
+				<Feed fetchType={"search"} searchQuery={searchQuery || ""} />
 			</div>
 		</div>
 	);

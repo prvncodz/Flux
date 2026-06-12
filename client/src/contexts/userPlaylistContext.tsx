@@ -1,6 +1,5 @@
-
 import { createContext } from "react";
 
-const userPlaylistcontext = createContext(null);
+const userPlaylistcontext = createContext<{ owner: string | null }>({ owner: null });
 
 export default userPlaylistcontext;

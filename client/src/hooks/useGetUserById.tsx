@@ -1,49 +1,42 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "../api/axios";
+import { AxiosError } from "axios";
+import { Video } from "../types";
 
-const useGetUserById = (userId) => {
-    const [avatarUrl, setAvatarUrl] = useState(null);
-    const [coverimgUrl, setCoverimageUrl] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [fullname, setFullname] = useState(null);
-    const [username, setUsername] = useState(null);
-    const [email, setEmail] = useState(null);
-    const [watchHistory, setWatchHistory] = useState([]);
-
-    if (!userId) {
-        return;
-    }
+const useGetUserById = (userId: string | undefined) => {
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [coverimgUrl, setCoverimageUrl] = useState<string | null>(null);
+    const [fullname, setFullname] = useState<string | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
+    const [email, setEmail] = useState<string | null>(null);
+    const [watchHistory, setWatchHistory] = useState<(string | Video)[]>([]);
 
     const fetchUserById = useCallback(
-        async (userId) => {
+        async (id: string) => {
             try {
-                setLoading(true);
-                const res = await axios.get(`user/c/${userId}`);
+                const res = await axios.get(`user/c/${id}`);
                 if (res.status === 200) {
                     setAvatarUrl(res.data.data?.avatar?.url);
-                    setLoading(false);
                     setCoverimageUrl(res.data.data?.coverImage?.url);
                     setFullname(res.data.data?.fullName);
                     setUsername(res.data.data?.userName);
                     setEmail(res.data.data?.email);
                     setWatchHistory(res.data.data?.watchHistory);
                 }
-            } catch (error) {
-                console.log(error);
-                console.log("backend message :", error?.response?.data?.message);
-                setLoading(false);
+            } catch (error: unknown) {
+                if(error instanceof AxiosError) {
+                    console.error("backend message :", error?.response?.data?.message);
+                }
             }
         },
-        [userId],
+        [],
     );
 
     useEffect(() => {
-        try {
+        if (userId) {
             fetchUserById(userId);
-        } catch (error) {
-            console.log(error);
         }
-    }, [fetchUserById]);
+    }, [userId, fetchUserById]);
 
     return { avatarUrl, coverimgUrl, fullname, username, email, watchHistory };
 };

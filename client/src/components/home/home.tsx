@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import Nav from "./nav";
 import Feed from "./videofeed/feed";
 import TweetFeed from "./tweetfeed/tweetFeed";
@@ -8,8 +8,8 @@ import { motion } from "motion/react"
 export default function Home() {
 
     const location = useLocation();
-    const [isHomeSelected, setIsHomeSelected] = useState(true);
-    const { tab } = location.state || {};
+    const [isHomeSelected, setIsHomeSelected] = useState<boolean>(true);
+    const { tab } = (location.state as { tab?: string }) || {};
 
     useEffect(() => {
         if (tab === "posts") {

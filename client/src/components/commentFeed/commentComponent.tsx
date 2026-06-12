@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetUserById } from "../../hooks/useGetUserById";
 import Like from "../home/likeComponent/likeButton";
 import dpfp from "../assets/dpfp.jpg";
@@ -8,6 +8,8 @@ import ChatBubbleIcon from "../assets/chatIcon";
 import { useNavigate } from "react-router-dom";
 import ReplyIcon from "../assets/replyIcon";
 import useUserStore from "../../stores/user.store";
+import { Comment } from "../../types/comment.types";
+import React from "react";
 
 export default function CommentComponent({
     comment,
@@ -18,7 +20,7 @@ export default function CommentComponent({
     commentsLength,
     setLoading,
 }: {
-    comment?: any;
+    comment?: Comment;
     onlyContent?: boolean;
     mainPost?: boolean;
     setShowSignInPopup?: (b: boolean) => void;
@@ -26,12 +28,12 @@ export default function CommentComponent({
     commentsLength?: number;
     setLoading?: (b: boolean) => void;
 }) {
-    const { avatarUrl, fullname, username } = useGetUserById(comment?.owner) || ({} as any);
+    const { avatarUrl, fullname, username } = useGetUserById(comment?.owner as string) || ({} as any);
     const [showAddReplyBox, setShowAddReplyBox] = useState<boolean>(false);
-    const [commentsPosts, setCommentPosts] = useState<any[]>([{}]);
+    const [commentsPosts, setCommentPosts] = useState<Comment[]>([]);
     const [areAnyComments, setAreAnyComments] = useState<boolean>(false);
-    const user = useUserStore((s: any) => s.user);
-    const isUserLogged = useUserStore((s: any) => s.isUserLogged);
+    const user = useUserStore((s) => s.user);
+    const isUserLogged = useUserStore((s) => s.isUserLogged);
     const navigate = useNavigate();
 
     function HandleReplyToComment() {
@@ -56,8 +58,6 @@ export default function CommentComponent({
                     postType: "comment",
                 },
             });
-        } else {
-            return;
         }
     }
 
@@ -69,7 +69,7 @@ export default function CommentComponent({
             try {
                 const res = await axios.get(
                     `/comments/${comment?._id}/get-comment-comments${user?._id ? `?userId=${user._id}` : ``}`,
-                ); //if userid is there it will be sent as query else no query will be sent
+                );
                 if (res.status === 200) {
                     setCommentPosts(res.data?.data);
                     if (res.data.data.length !== 0) {
@@ -82,8 +82,11 @@ export default function CommentComponent({
                 console.log(err);
             }
         }
-        getAllCommentPosts();
-    }, [comment?._id, user?._id]);
+        if (comment?._id) {
+            getAllCommentPosts();
+        }
+    }, [comment?._id, user?._id, idx, commentsLength, setLoading]);
+
     if (onlyContent) {
         return (
             <div className="flex p-3">
@@ -125,7 +128,7 @@ export default function CommentComponent({
                     <span>
                         <Like
                             fetchType={"comment"}
-                            Id={comment._id}
+                            Id={comment?._id}
                             likeStatus={comment?.isLiked}
                             setShowSignInPopup={setShowSignInPopup}
                             isUserLogged={isUserLogged}
@@ -154,13 +157,14 @@ export default function CommentComponent({
                 </div>
             </div>
 
-            {showAddReplyBox && (
+            {showAddReplyBox && comment?._id && (
                 <AddCommentsBox
                     fetchType={"comment"}
                     Id={comment?._id}
                     setShowAddReplyBox={setShowAddReplyBox}
                 />
             )}
+
         </>
     );
 }
