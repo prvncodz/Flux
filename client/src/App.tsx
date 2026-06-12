@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./components/home/home";
 const SignUp = React.lazy(() => import("./components/signup"));
 const SignIn = React.lazy(() => import("./components/signin"));
 import Profile from "./components/userProfile/profile";
-import axios from "./api/axios";
 import WatchVideoPage from "./components/watch/watchVideoPage";
 import WatchPostPage from "./components/watch/watchPostPage";
 import Dashboard from "./components/dashboard/dashboard";
@@ -14,37 +13,16 @@ import WatchPlaylist from "./components/playlist/watchPlaylist";
 import SearchVideoPage from "./components/search/searchVideoPage";
 import SearchPostPage from "./components/search/searchPostPage";
 import useUserStore from "./stores/user.store";
+import { useGetUser } from "./hooks/useUser";
 
 function App() {
-    const [isTokenReceived, setIsTokenReceived] = useState(false);
-    const setUser = useUserStore((s: any) => s.setUser);
-    const setIsUserLogged = useUserStore((s: any) => s.setIsUserLogged);
+    const isUserLogged = useUserStore((s: any) => s.isUserLogged);
 
     useEffect(() => {
-        async function loginUser() {
-            try {
-                const response = await axios.get("/user/current-user");
-                if (response.status === 200) {
-                    setUser(response.data.data);
-                    setIsUserLogged(true);
-                }
-            } catch (error: any) {
-                setUser({});
-                setIsUserLogged(false);
-                try {
-                    if (error?.status === 500) {
-                        const res = await axios.post("/user/refresh-tokens");
-                        if (res.status == 200) {
-                            setIsTokenReceived(true);
-                        }
-                    }
-                } catch (error2: any) {
-                    console.log(error2);
-                }
-            }
+        if (isUserLogged) {
+            useGetUser();
         }
-        loginUser();
-    }, [isTokenReceived]);
+    }, [isUserLogged]);
 
     return (
         <BrowserRouter>

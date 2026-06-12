@@ -1,13 +1,23 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware"
 
-type TabState = {
-  tab: string;
-  setTab: (tab: string) => void;
+
+interface TabState {
+    tab: string;
+    setTab: (tab: string) => void;
 };
 
-const useTab = create<TabState>((set: any) => ({
-    tab: "home",
-    setTab: (tab: string) => set({ tab: tab }),
-}))
+const useTab = create<TabState>()(
+    persist(
+        (set) => ({
+            tab: "home",
+            setTab: (tab: string) => set({ tab: tab }),
+        }),
+        {
+            name: "tab-store",
+            storage: createJSONStorage(() => sessionStorage),
+        }
+    )
+)
 
 export default useTab;
