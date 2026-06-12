@@ -3,7 +3,7 @@
 > A social media platform built for tech enthusiasts.
 
 
-![Flux Interface](./client/components/assets/interface.png)
+![Flux Interface](./client/src/components/assets/interface.png)
 
 ---
 
