@@ -130,7 +130,7 @@ export default function Feed({
 
     return (
         <div
-            className={`scroll-smooth  relative gap-6 w-full overflow-y-auto overflow-x-hidden grid gird-cols-1 mb-5 md:grid-cols-2  md:gap-3 ${fetchType === "user" ? "h-[64vh] md:p-5  lg:pb-35 lg:grid-cols-3 xl:grid-cols-4" : recommendations ? "overflow-visible pb-15 md:pb-20 md:p-3 lg:max-w-[20vw] lg:grid-cols-1 xl:grid-cols-1  lg:w-full box-border" : "h-[90vh] md:pl-16 md:pr-5 lg:pl-18 lg:h-screen lg:pb-20 lg:pr-4 lg:grid-cols-3 xl:grid-cols-4 "}  md:py-4 ${className || ""} `}
+            className={`scroll-smooth  relative gap-6 w-full overflow-y-auto overflow-x-hidden grid gird-cols-1 mb-5 md:grid-cols-2  md:gap-3 ${fetchType === "user" ? "h-[64vh] md:p-5  lg:pb-35 lg:grid-cols-3 xl:grid-cols-4" : recommendations ? "overflow-visible pb-15 md:pb-20 md:p-3 lg:max-w-[20vw] lg:grid-cols-1 xl:grid-cols-1  lg:w-full box-border" : "h-[90dvh] md:pl-16 md:pr-5 lg:pl-18 lg:h-screen lg:pb-20 lg:pr-4 lg:grid-cols-3 xl:grid-cols-4 "}  md:py-4 ${className || ""} `}
             ref={ref}
         >
             {areVideosFetched &&
