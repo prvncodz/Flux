@@ -5,15 +5,15 @@ import { toast } from "sonner";
 
 const api = axios.create({
     withCredentials: true,
-    baseURL: "/api/v1",
+    baseURL: "http://localhost:8000/api/v1",
 });
 
 api.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        const status = error?.response ? error?.response?.data?.status : null;
-        const message = error?.response ? error?.response?.data?.message : null;
-        const originalRequest = error?.config;
+    (error) => {
+        const status = error.response ? error?.response?.status : null;
+        const message = error.response ? error?.response?.data?.message : null;
+        const originalRequest = error.config;
 
         if (status === 401 && useUserStore.getState().isUserLogged) {
             return refreshTokens(originalRequest)

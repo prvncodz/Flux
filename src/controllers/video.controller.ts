@@ -268,7 +268,6 @@ const getVideoById = asyncHandler(async (req: Request, res: Response) => {
             },
         },
     ]);
-    console.log("video:", video)
     if (!video?.[0]) throw new ApiError(500, "video doesn't exists")
 
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
