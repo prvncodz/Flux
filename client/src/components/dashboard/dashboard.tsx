@@ -4,10 +4,10 @@ import Nav from "../home/nav";
 import axios from "../../api/axios";
 import dbanner from "../assets/dbanner.jpg";
 import dpfp from "../assets/dpfp.jpg";
-import EditProfilePopUp from "../userProfile/editProfilePopup.jsx";
-import EditVideoPopup from "./EditVideoPopup.jsx";
+import EditProfilePopUp from "../userProfile/editProfilePopup";
+import EditVideoPopup from "./EditVideoPopup";
 import { motion } from "motion/react"
-import useTab from "../../stores/tab.store.js";
+import useTab from "../../stores/tab.store";
 
 const CheckIcon = () => (
     <svg

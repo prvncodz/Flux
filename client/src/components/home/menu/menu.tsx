@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import CancelIconComponent from "../../userProfile/cancelIconComponent.jsx";
+import CancelIconComponent from "../../userProfile/cancelIconComponent";
 import { useNavigate } from "react-router-dom";
 import {
     History,

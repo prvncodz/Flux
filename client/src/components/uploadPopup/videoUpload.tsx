@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PopUpComponent from "./popupComponent";
-import SubmitButton from "../submitButton.jsx";
-import axios from "../../api/axios.js";
+import SubmitButton from "../submitButton";
+import axios from "../../api/axios";
 
 export default function VideoUploadPopup({ setShowPopup }) {
 	const [loading, SetLoading] = useState(false);

@@ -1,13 +1,14 @@
 import { useState } from "react";
-import SubmitButton from "../../components/submitButton.jsx";
+import SubmitButton from "../../components/submitButton";
 import PopUpComponent from "../uploadPopup/popupComponent";
 import axios from "../../api/axios";
 
-export default function EditPlaylistPopup({ setShowPopup, playlist }) {
-	const [loading, SetLoading] = useState(false);
-	const [isSubmmited, setIsSubmmited] = useState(false);
-	const [name, setName] = useState(playlist?.name)
-	const [desc, setDesc] = useState(playlist?.description);
+import React from "react";
+export default function EditPlaylistPopup({ setShowPopup, playlist }: { setShowPopup: (b: boolean) => void; playlist?: any; }) {
+	const [loading, SetLoading] = React.useState<boolean>(false);
+	const [isSubmmited, setIsSubmmited] = React.useState<boolean>(false);
+	const [name, setName] = React.useState<string | undefined>(playlist?.name)
+	const [desc, setDesc] = React.useState<string | undefined>(playlist?.description);
 
 	async function handlePostUpload(e) {
 		e.preventDefault();

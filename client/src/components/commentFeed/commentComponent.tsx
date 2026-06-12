@@ -1,13 +1,13 @@
-import { useGetUserById } from "../../hooks/useGetUserById.jsx";
-import Like from "../home/likeComponent/likeButton.jsx";
+import React, { useEffect, useState } from "react";
+import { useGetUserById } from "../../hooks/useGetUserById";
+import Like from "../home/likeComponent/likeButton";
 import dpfp from "../assets/dpfp.jpg";
-import { useContext, useEffect, useState } from "react";
-import axios from "../../api/axios.js";
-import AddCommentsBox from "./AddCommentBox.jsx";
-import ChatBubbleIcon from "../assets/chatIcon.jsx";
+import axios from "../../api/axios";
+import AddCommentsBox from "./AddCommentBox";
+import ChatBubbleIcon from "../assets/chatIcon";
 import { useNavigate } from "react-router-dom";
-import ReplyIcon from "../assets/replyIcon.jsx";
-import useUserStore from "../../stores/user.store.js";
+import ReplyIcon from "../assets/replyIcon";
+import useUserStore from "../../stores/user.store";
 
 export default function CommentComponent({
     comment,
@@ -17,18 +17,26 @@ export default function CommentComponent({
     idx,
     commentsLength,
     setLoading,
+}: {
+    comment?: any;
+    onlyContent?: boolean;
+    mainPost?: boolean;
+    setShowSignInPopup?: (b: boolean) => void;
+    idx?: number;
+    commentsLength?: number;
+    setLoading?: (b: boolean) => void;
 }) {
-    const { avatarUrl, fullname, username } = useGetUserById(comment?.owner);
-    const [showAddReplyBox, setShowAddReplyBox] = useState(false);
-    const [commentsPosts, setCommentPosts] = useState([{}]);
-    const [areAnyComments, setAreAnyComments] = useState(false);
-    const user = useUserStore(s => s.user);
-    const isUserLogged = useUserStore(s => s.isUserLogged);
+    const { avatarUrl, fullname, username } = useGetUserById(comment?.owner) || ({} as any);
+    const [showAddReplyBox, setShowAddReplyBox] = useState<boolean>(false);
+    const [commentsPosts, setCommentPosts] = useState<any[]>([{}]);
+    const [areAnyComments, setAreAnyComments] = useState<boolean>(false);
+    const user = useUserStore((s: any) => s.user);
+    const isUserLogged = useUserStore((s: any) => s.isUserLogged);
     const navigate = useNavigate();
 
     function HandleReplyToComment() {
         if (!isUserLogged) {
-            setShowSignInPopup(true);
+            setShowSignInPopup && setShowSignInPopup(true);
             return;
         }
         if (!mainPost) {
@@ -37,7 +45,7 @@ export default function CommentComponent({
     }
     function handleShowPostPage() {
         if (!isUserLogged) {
-            setShowSignInPopup(true);
+            setShowSignInPopup && setShowSignInPopup(true);
             return;
         }
         if (!mainPost) {
@@ -54,8 +62,8 @@ export default function CommentComponent({
     }
 
     useEffect(() => {
-        if (idx === commentsLength - 1) {
-            setLoading(false);
+        if (typeof idx === 'number' && typeof commentsLength === 'number' && idx === commentsLength - 1) {
+            setLoading && setLoading(false);
         }
         async function getAllCommentPosts() {
             try {
@@ -82,7 +90,7 @@ export default function CommentComponent({
                 <img
                     src={avatarUrl || dpfp}
                     className="rounded-full h-10 w-10"
-                    onError={(e) => (e.target.src = dpfp)}
+                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => ((e.target as HTMLImageElement).src = dpfp)}
                 />
                 <h1 className="text-neutral-700 text-lg font-normal text-left wrap ml-3 my-1 w-full">
                     {comment?.content || ""}
@@ -98,7 +106,7 @@ export default function CommentComponent({
                         <img
                             src={avatarUrl || dpfp}
                             className="rounded-full h-10 w-10"
-                            onError={(e) => (e.target.src = dpfp)}
+                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => ((e.target as HTMLImageElement).src = dpfp)}
                         />
                     </div>
                     <span className="ml-4 h-7">
@@ -136,7 +144,7 @@ export default function CommentComponent({
                         onClick={handleShowPostPage}
                         className="flex text-sm text-black cursor-pointer "
                     >
-                        <ChatBubbleIcon size={26} className="bg-gray-600" />
+                        <ChatBubbleIcon size={26} />
                         {!areAnyComments || mainPost ? (
                             ""
                         ) : (

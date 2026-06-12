@@ -1,37 +1,38 @@
 import { useState, useEffect, useContext, useCallback } from "react";
-import axios from "../../api/axios.js";
-import UserTick from "../assets/usertick.jsx";
-import UserAddIcon from "../assets/useradd.jsx";
+import axios from "../../api/axios";
+import UserTick from "../assets/usertick";
+import UserAddIcon from "../assets/useradd";
 import dbanner from "../assets/dbanner.jpg";
 import dpfp from "../assets/dpfp.jpg";
-import Button from "../button.jsx";
-import VideoFeed from "../home/videofeed/feed.jsx";
-import PostFeed from "../home/tweetfeed/tweetFeed.jsx";
-import PlaylistFeed from "../home/playlistfeed/playlistFeed.jsx";
-import EditProfilePopUp from "./editProfilePopup.jsx";
-import ChangePassPopup from "./changePass.jsx";
+import Button from "../button";
+import VideoFeed from "../home/videofeed/feed";
+import PostFeed from "../home/tweetfeed/tweetFeed";
+import PlaylistFeed from "../home/playlistfeed/playlistFeed";
+import EditProfilePopUp from "./editProfilePopup";
+import ChangePassPopup from "./changePass";
 import { useLocation, useParams } from "react-router-dom";
 import { ArrowLeftIcon, Ellipsis, LucideDotSquare, Pen, UserRoundKey } from "lucide-react";
-import SignInBanner from "../signinInstructPopup.jsx";
+import SignInBanner from "../signinInstructPopup";
 import { motion } from "motion/react"
-import useUserStore from "../../stores/user.store.js";
+import useUserStore from "../../stores/user.store";
 
+import React from "react";
 export default function Profile() {
 
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
-    const [UserProfile, setUserProfile] = useState({});
-    const [tabOpened, setTabOpened] = useState("videos");
-    const [showElipse, setShowElipse] = useState(false);
-    const [isPopupActive, setisPopupActive] = useState(false);
-    const [isEditPopUpActive, setIsEditPopUpActive] = useState(false);
-    const [isPassPopupActive, setIsPassPopupActive] = useState(false);
-    const [isOtherUserP, setIsOtherUserP] = useState(false);
+    const [UserProfile, setUserProfile] = React.useState<any>({});
+    const [tabOpened, setTabOpened] = React.useState<string>("videos");
+    const [showElipse, setShowElipse] = React.useState<boolean>(false);
+    const [isPopupActive, setisPopupActive] = React.useState<boolean>(false);
+    const [isEditPopUpActive, setIsEditPopUpActive] = React.useState<boolean>(false);
+    const [isPassPopupActive, setIsPassPopupActive] = React.useState<boolean>(false);
+    const [isOtherUserP, setIsOtherUserP] = React.useState<boolean>(false);
     const { username } = useParams();
-    const [isSubscribed, setIsSubscribed] = useState(false);
-    const [isProfileFetched, setIsProfileFetched] = useState(false);
-    const [signinInstruction, setSigninInstruction] = useState(false);
-    let timeoutId;
+    const [isSubscribed, setIsSubscribed] = React.useState<boolean>(false);
+    const [isProfileFetched, setIsProfileFetched] = React.useState<boolean>(false);
+    const [signinInstruction, setSigninInstruction] = React.useState<boolean>(false);
+    let timeoutId: number | undefined;
 
     async function handleSubscription() {
         clearTimeout(timeoutId);

@@ -1,8 +1,8 @@
 import { useLocation, useParams } from "react-router-dom";
-import Nav from "../home/nav.jsx";
-import TweetComponent from "../home/tweetfeed/tweet.jsx";
-import AddCommentsBox from "../commentFeed/AddCommentBox.jsx";
-import CommentComponent from "../commentFeed/commentComponent.jsx";
+import Nav from "../home/nav";
+import TweetComponent from "../home/tweetfeed/tweet";
+import AddCommentsBox from "../commentFeed/AddCommentBox";
+import CommentComponent from "../commentFeed/commentComponent";
 
 export default function WatchPostPage() {
 	const location = useLocation();

@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext, useRef } from "react";
-import axios from "../../api/axios.js";
-import CommentComponent from "./commentComponent.jsx";
-import AddCommentsBox from "./AddCommentBox.jsx";
+import React, { useRef, useState, useEffect } from "react";
+import axios from "../../api/axios";
+import CommentComponent from "./commentComponent";
+import AddCommentsBox from "./AddCommentBox";
 import { X } from "lucide-react";
-import useUserStore from "../../stores/user.store.js";
+import useUserStore from "../../stores/user.store";
 
 export default function CommentFeed({
     fetchType,
@@ -11,6 +11,12 @@ export default function CommentFeed({
     isOpen,
     setIsOpen,
     setShowSignInPopup,
+}: {
+    fetchType?: string;
+    Id?: string;
+    isOpen?: boolean;
+    setIsOpen?: (b: boolean) => void;
+    setShowSignInPopup?: (b: boolean) => void;
 }) {
     const [comments, setComments] = useState([]);
     const [areCommentsFetched, SetAreCommentsFetched] = useState(false);

@@ -1,7 +1,8 @@
 import CancelIconComponent from "../userProfile/cancelIconComponent";
 import { motion } from "motion/react"
 
-export default function PopUpComponent({ children, onCancel }) {
+import React from "react";
+export default function PopUpComponent({ children, onCancel }: { children?: React.ReactNode; onCancel?: () => void; }) {
     return (
         <motion.div
             initial={{

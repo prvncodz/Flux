@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import axios from "../api/axios.js";
+import axios from "../api/axios";
 
 const useGetUserById = (userId) => {
     const [avatarUrl, setAvatarUrl] = useState(null);

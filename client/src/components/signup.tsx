@@ -2,8 +2,8 @@ import defaultPfp from "./assets/dpfp.jpg";
 import defaultBanner from "./assets/dbanner.jpg";
 import editIcon from "./assets/editimage.png";
 import { useState, useRef } from "react";
-import SubmitButton from "./submitButton.jsx";
-import axios from "../api/axios.js";
+import SubmitButton from "./submitButton";
+import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 export default function SignUp() {

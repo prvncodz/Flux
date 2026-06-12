@@ -1,7 +1,7 @@
-import { useState, useEffect, useContext, useRef } from "react";
-import axios from "../../../api/axios.js";
-import VideoComponent from "./VideoComponent.jsx";
-import useUserStore from "../../../stores/user.store.js";
+import React, { useRef } from "react";
+import axios from "../../../api/axios";
+import VideoComponent from "./VideoComponent";
+import useUserStore from "../../../stores/user.store";
 
 export default function Feed({
     fetchType,
@@ -9,15 +9,21 @@ export default function Feed({
     searchQuery,
     recommendations,
     playingVideoId,
+}: {
+    fetchType?: string;
+    userId?: string;
+    searchQuery?: string;
+    recommendations?: boolean;
+    playingVideoId?: string;
 }) {
-    const [videos, setVideos] = useState(null);
-    const [areVideosFetched, SetAreVideosFetched] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
+    const [videos, setVideos] = React.useState<any[] | null>(null);
+    const [areVideosFetched, SetAreVideosFetched] = React.useState<boolean>(false);
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const [page, setPage] = React.useState<number>(1);
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
-    const [hasNoMore, setHasNoMore] = useState(false);
-    const ref = useRef(null);
+    const [hasNoMore, setHasNoMore] = React.useState<boolean>(false);
+    const ref = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         setVideos([]);

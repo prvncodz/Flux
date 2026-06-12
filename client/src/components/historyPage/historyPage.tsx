@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import Nav from "../home/nav.jsx";
-import axios from "../../api/axios.js";
+import Nav from "../home/nav";
+import axios from "../../api/axios";
 import { useState, useEffect } from "react";
-import useTab from "../../stores/tab.store.js";
+import useTab from "../../stores/tab.store";
 
 export default function HistoryPage() {
     const navigate = useNavigate();

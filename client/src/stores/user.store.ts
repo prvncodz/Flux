@@ -1,10 +1,17 @@
 import { create } from "zustand";
 
-const useUserStore = create(set => ({
+type UserState = {
+  user: any;
+  setUser: (u: any) => void;
+  isUserLogged: boolean;
+  setIsUserLogged: (b: boolean) => void;
+};
+
+const useUserStore = create<UserState>((set: any) => ({
     user: {},
-    setUser: (user) => set({ user: user }),
+    setUser: (user: any) => set({ user: user }),
     isUserLogged: false,
-    setIsUserLogged: (bool) => set({ isUserLogged: bool }),
+    setIsUserLogged: (bool: boolean) => set({ isUserLogged: bool }),
 }))
 
 export default useUserStore;

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, useRef } from "react";
-import axios from "../../../api/axios.js";
-import TweetComponent from "./tweet.jsx";
+import axios from "../../../api/axios";
+import TweetComponent from "./tweet";
 import { LoaderCircle } from "lucide-react";
-import SignInBanner from "../../signinInstructPopup.jsx";
-import useUserStore from "../../../stores/user.store.js";
+import SignInBanner from "../../signinInstructPopup";
+import useUserStore from "../../../stores/user.store";
 
 export default function Feed({ fetchType, userId, searchQuery }) {
     const [tweets, setTweets] = useState([]);

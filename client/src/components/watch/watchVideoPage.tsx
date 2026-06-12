@@ -1,19 +1,19 @@
 import { useLocation, useParams } from "react-router-dom";
-import Nav from "../home/nav.jsx";
+import Nav from "../home/nav";
 import dpfp from "../assets/dpfp.jpg";
-import Button from "../button.jsx";
-import UserTick from "../assets/usertick.jsx";
-import UserAddIcon from "../assets/useradd.jsx";
+import Button from "../button";
+import UserTick from "../assets/usertick";
+import UserAddIcon from "../assets/useradd";
 import { useContext, useEffect, useState } from "react";
-import axios from "../../api/axios.js";
-import CommentFeed from "../commentFeed/commentFeed.jsx";
-import VideoDescription from "./videoDescription.jsx";
-import VideoFeed from "../home/videofeed/feed.jsx";
-import LikeButton from "../home/likeComponent/likeButton.jsx";
-import VideoPlayer from "../home/videofeed/VideoPlayer.jsx";
-import SignInBanner from "../signinInstructPopup.jsx";
-import useUserStore from "../../stores/user.store.js";
-import useTab from "../../stores/tab.store.js";
+import axios from "../../api/axios";
+import CommentFeed from "../commentFeed/commentFeed";
+import VideoDescription from "./videoDescription";
+import VideoFeed from "../home/videofeed/feed";
+import LikeButton from "../home/likeComponent/likeButton";
+import VideoPlayer from "../home/videofeed/VideoPlayer";
+import SignInBanner from "../signinInstructPopup";
+import useUserStore from "../../stores/user.store";
+import useTab from "../../stores/tab.store";
 
 export default function WatchVideoPage() {
     const location = useLocation();

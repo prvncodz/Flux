@@ -1,9 +1,16 @@
+import React from "react";
 export default function SubmitButton({
 	currentSubmitStatus,
 	text,
 	className,
 	ref,
-	centered
+	centered,
+}: {
+	currentSubmitStatus?: "normal" | "loading" | "submited" | string;
+	text?: string;
+	className?: string;
+	ref?: React.Ref<HTMLButtonElement>;
+	centered?: boolean;
 }) {
 	return (
 		<button

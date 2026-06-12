@@ -34,6 +34,7 @@ const formatTime = (timeInSeconds) => {
  * @param {string} color - Primary accent color hex code (Default: '#7c3aed')
  * @param {boolean} fit - If true, video fits within container (contain). If false, it fills (cover). (Default: true)
  */
+import React, { useRef } from "react";
 const VideoPlayer = ({
   videoUrl,
   autoplay = true,
@@ -42,7 +43,52 @@ const VideoPlayer = ({
   color = "#7c3aed",
   fit = true,
   className = "",
+}: {
+  videoUrl?: string;
+  autoplay?: boolean;
+  replay?: boolean;
+  theme?: "dark" | "light";
+  color?: string;
+  fit?: boolean;
+  className?: string;
 }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const speedMenuRef = useRef<HTMLDivElement | null>(null);
+
+  // State
+  const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
+  const [isEnded, setIsEnded] = React.useState<boolean>(false);
+  const [progress, setProgress] = React.useState<number>(0);
+  const [duration, setDuration] = React.useState<number>(0);
+  const [volume, setVolume] = React.useState<number>(1);
+  const [isMuted, setIsMuted] = React.useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = React.useState<boolean>(false);
+  const [showControls, setShowControls] = React.useState<boolean>(!autoplay);
+  const [showSpeedMenu, setShowSpeedMenu] = React.useState<boolean>(false);
+  const [playbackSpeed, setPlaybackSpeed] = React.useState<number>(1);
+  const [isBuffering, setIsBuffering] = React.useState<boolean>(false);
+  const [buffered, setBuffered] = React.useState<number>(0);
+  const [isCover, setIsCover] = React.useState<boolean>(!fit);
+  const [error, setError] = React.useState<boolean>(false);
+
+  // Feedback UI State
+  const [volumeOverlay, setVolumeOverlay] = React.useState<{show:boolean;value:number}>({
+    show: false,
+    value: 0,
+  });
+  const [skipFeedback, setSkipFeedback] = React.useState<{show:boolean;direction: string|null;fadingOut:boolean}>({
+    show: false,
+    direction: null,
+    fadingOut: false,
+  });
+
+  // Refs
+  const volumeTimeoutRef = useRef<number | null>(null);
+  const clickTimeoutRef = useRef<number | null>(null);
+  const lastClickTimeRef = useRef<number>(0);
+  const controlsTimeout = useRef<number | null>(null);
+
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const speedMenuRef = useRef(null);

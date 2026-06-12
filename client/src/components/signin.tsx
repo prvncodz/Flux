@@ -1,8 +1,8 @@
 import { useState, useEvent, useRef, useContext } from "react";
-import axios from "../api/axios.js";
-import SubmitButton from "./submitButton.jsx";
+import axios from "../api/axios";
+import SubmitButton from "./submitButton";
 import { useNavigate } from "react-router-dom";
-import useUserStore from "../stores/user.store.js";
+import useUserStore from "../stores/user.store";
 
 export default function SignIn() {
   const [loading, SetLoading] = useState(false);

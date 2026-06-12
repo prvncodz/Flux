@@ -1,8 +1,7 @@
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import axios from "../../api/axios";
 import { PlusCircle } from "lucide-react";
 import useUserStore from "../../stores/user.store";
-
 export default function AddCommentsBox({
     Id,
     fetchType,
@@ -10,15 +9,23 @@ export default function AddCommentsBox({
     setShowAddTweetBox,
     setShowAddReplyBox,
     setShowSignInPopup,
-    setComments
+    setComments,
+}: {
+    Id?: string;
+    fetchType?: string;
+    className?: string;
+    setShowAddTweetBox?: (b: boolean) => void;
+    setShowAddReplyBox?: (b: boolean) => void;
+    setShowSignInPopup?: (b: boolean) => void;
+    setComments?: (updater: (prev: any[]) => any[]) => void;
 }) {
-    const [content, setContent] = useState("");
-    let addCommentRef = useRef(null);
+    const [content, setContent] = useState<string>("");
+    const addCommentRef = useRef<HTMLButtonElement | null>(null);
 
     const isUserLogged = useUserStore(s => s.isUserLogged);
     async function handleAddComment() {
         if (!isUserLogged) {
-            setShowSignInPopup(true);
+            setShowSignInPopup && setShowSignInPopup(true);
             return;
         }
         if (content === "" || !content) return;
@@ -29,7 +36,7 @@ export default function AddCommentsBox({
                 });
                 if (res.status == 200) {
                     setContent("");
-                    setComments(prev => [...prev, res.data?.data]);
+                    setComments && setComments(prev => [...prev, res.data?.data]);
                 }
             } catch (err) {
                 console.log("error occured while adding a new comment", err);
@@ -41,7 +48,7 @@ export default function AddCommentsBox({
                 });
                 if (res.status == 200) {
                     setContent("");
-                    setComments(prev => [...prev, res.data?.data]);
+                    setComments && setComments(prev => [...prev, res.data?.data]);
                 }
             } catch (err) {
                 console.log("error occured while adding a new comment", err);
@@ -53,7 +60,7 @@ export default function AddCommentsBox({
                 });
                 if (res.status == 200) {
                     setContent("");
-                    setComments(prev => [...prev, res.data?.data]);
+                    setComments && setComments(prev => [...prev, res.data?.data]);
                 }
             } catch (err) {
                 console.log("error occured while adding a new comment", err);
@@ -76,7 +83,7 @@ export default function AddCommentsBox({
                 onChange={(e) => setContent(e.target.value)}
                 onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                        addCommentRef.current.click();
+                        addCommentRef.current?.click();
                         setContent("");
                     }
                 }}

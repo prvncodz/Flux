@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
-export default function SignInBanner({ setShowPopup }) {
+import React from "react";
+export default function SignInBanner({ setShowPopup }: { setShowPopup: (b: boolean) => void; }) {
   useEffect(() => {}, []);
   return (
     <div className="w-full px-3 pt-3 sm:px-4 sm:pt-4 absolute top-12 left-0  md:left-1/4 lg:left-1/3  origin-center z-30">

@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext, useRef } from "react";
-import axios from "../../../api/axios.js";
-import PlaylistComponent from "./playlistComponent.jsx";
+import axios from "../../../api/axios";
+import PlaylistComponent from "./playlistComponent";
 import { Loader2 } from "lucide-react";
-import UserPlaylistContext from "../../../contexts/userPlaylistContext.jsx"
+import UserPlaylistContext from "../../../contexts/userPlaylistContext"
 
 export default function PlaylistFeed({ userId }) {
     const [playlists, setPlaylists] = useState([]);

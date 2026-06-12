@@ -2,13 +2,13 @@ import logo from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import { useNavigate } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
-import axios from "../../api/axios.js";
+import axios from "../../api/axios";
 import dpfp from "../assets/dpfp.jpg";
-import VideoUploadPopup from "../uploadPopup/videoUpload.jsx";
-import PostUploadPopup from "../uploadPopup/postUpload.jsx";
-import CreateComponent from "./Upload_CreateComponent.jsx";
-import Menu from "./menu/menu.jsx";
-import MenuBtn from "../assets/menubtn.jsx";
+import VideoUploadPopup from "../uploadPopup/videoUpload";
+import PostUploadPopup from "../uploadPopup/postUpload";
+import CreateComponent from "./Upload_CreateComponent";
+import Menu from "./menu/menu";
+import MenuBtn from "../assets/menubtn";
 import {
     ArrowLeft,
     CircleUserRound,
@@ -17,13 +17,14 @@ import {
     LogOutIcon,
     Search,
 } from "lucide-react";
-import SignInBanner from "../signinInstructPopup.jsx";
-import CreatePlaylistPopup from "./playlistfeed/CreatePlaylistPopup.jsx";
+import SignInBanner from "../signinInstructPopup";
+import CreatePlaylistPopup from "./playlistfeed/CreatePlaylistPopup";
 import { motion } from "motion/react"
-import useTab from "../../stores/tab.store.js";
-import useUserStore from "../../stores/user.store.js";
+import useTab from "../../stores/tab.store";
+import useUserStore from "../../stores/user.store";
 
-export default function Nav({ wantTabs, searchType }) {
+import React from "react";
+export default function Nav({ wantTabs, searchType }: { wantTabs?: boolean; searchType?: string; }) {
     const navigate = useNavigate();
     const [isActive, setIsActive] = useState(false);
     const [notLoggedOut, setNotLoggedOut] = useState(true);

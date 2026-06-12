@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
-import axios from "../../../api/axios.js";
-import LikeIcon from "../../assets/likeIcon.jsx";
-import LikeFilledIcon from "../../assets/likeFilledIcon.jsx";
+import axios from "../../../api/axios";
+import LikeIcon from "../../assets/likeIcon";
+import LikeFilledIcon from "../../assets/likeFilledIcon";
 
 function LikeButton({
     fetchType,
@@ -9,9 +9,15 @@ function LikeButton({
     likeStatus,
     isUserLogged,
     setShowSignInPopup,
+}: {
+    fetchType: "video"|"comment"|"tweet"|string;
+    Id?: string;
+    likeStatus?: boolean;
+    isUserLogged?: boolean;
+    setShowSignInPopup?: (b: boolean) => void;
 }) {
-    const [liked, setLiked] = useState(likeStatus);
-    const [count, setCount] = useState(0);
+    const [liked, setLiked] = React.useState<boolean | undefined>(likeStatus);
+    const [count, setCount] = React.useState<number>(0);
 
     useEffect(() => {
         setLiked(likeStatus);

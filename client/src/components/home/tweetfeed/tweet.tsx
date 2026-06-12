@@ -1,15 +1,15 @@
-import Like from "../likeComponent/likeButton.jsx";
+import React from "react";
+import Like from "../likeComponent/likeButton";
 import dpfp from "../../assets/dpfp.jpg";
-import { useContext, useEffect, useState } from "react";
-import axios from "../../../api/axios.js";
-import ChatIcon from "../../assets/chatIcon.jsx";
+import axios from "../../../api/axios";
+import ChatIcon from "../../assets/chatIcon";
 import { useNavigate } from "react-router-dom";
-import AddCommentsBox from "../../commentFeed/AddCommentBox.jsx";
-import ReplyIcon from "../../assets/replyIcon.jsx";
-import TweetCardOptions from "./tweetCardOptions.jsx";
+import AddCommentsBox from "../../commentFeed/AddCommentBox";
+import ReplyIcon from "../../assets/replyIcon";
+import TweetCardOptions from "./tweetCardOptions";
 import { EllipsisVertical } from "lucide-react";
-import { DeletePost, EditPost } from "./tweetOptions.jsx";
-import useUserStore from "../../../stores/user.store.js";
+import { DeletePost, EditPost } from "./tweetOptions";
+import useUserStore from "../../../stores/user.store";
 
 export default function TweetComponent({
     tweet,
@@ -18,17 +18,24 @@ export default function TweetComponent({
     tweetsLength,
     setLoading,
     setShowSigninPopup,
+}: {
+    tweet?: any;
+    mainPost?: boolean;
+    idx?: number;
+    tweetsLength?: number;
+    setLoading?: (b: boolean) => void;
+    setShowSigninPopup?: (b: boolean) => void;
 }) {
-    const { avatar, fullName, userName } = tweet?.owner;
-    const [commentsPost, setCommentPosts] = useState([{}]);
-    const [showAddTweetBox, setShowAddTweetBox] = useState(false);
-    const [areAnyComments, setAreAnyComments] = useState(false);
+    const { avatar, fullName, userName } = (tweet?.owner ?? {}) as { avatar?: { url?: string }; fullName?: string; userName?: string };
+    const [commentsPost, setCommentPosts] = React.useState<any[]>([{}]);
+    const [showAddTweetBox, setShowAddTweetBox] = React.useState<boolean>(false);
+    const [areAnyComments, setAreAnyComments] = React.useState<boolean>(false);
     const user = useUserStore(s => s.user);
     const isUserLogged = useUserStore(s => s.isUserLogged);
-    const [isOptionActive, setIsOptionsActive] = useState(false)
-    const [showPopup, setShowPopup] = useState(false);
-    const [popupType, setPopupType] = useState(false);
-    const [isUserTweet, setIsUserTweet] = useState(false);
+    const [isOptionActive, setIsOptionsActive] = React.useState<boolean>(false)
+    const [showPopup, setShowPopup] = React.useState<boolean>(false);
+    const [popupType, setPopupType] = React.useState<string | boolean>("false");
+    const [isUserTweet, setIsUserTweet] = React.useState<boolean>(false);
 
     const popup = {
         "edit": <EditPost setShowPopup={setShowPopup} tweet={tweet} avatarUrl={avatar?.url} fullname={fullName} username={userName} />,

@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Nav from "../home/nav.jsx";
-import axios from "../../api/axios.js";
-import useTab from "../../stores/tab.store.js";
-import useUserStore from "../../stores/user.store.js";
+import Nav from "../home/nav";
+import axios from "../../api/axios";
+import useTab from "../../stores/tab.store";
+import useUserStore from "../../stores/user.store";
 
 export default function LikedVideos() {
     const navigate = useNavigate();

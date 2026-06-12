@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import type { Video } from "../../../types";
 import dpfp from "../../assets/dpfp.jpg";
 import { useNavigate } from "react-router-dom";
 
@@ -7,10 +8,15 @@ export default function VideoComponent({
     idx,
     videosLength,
     setLoading,
+}: {
+    video?: Video;
+    idx: number;
+    videosLength: number;
+    setLoading: (b: boolean) => void;
 }) {
-    const { avatar, userName, fullName } = video?.owner;
-    const [duration, setDuration] = useState("00:00");
-    const [timeOfUpload, setTimeOfUpload] = useState("1 day");
+    const { avatar, userName, fullName } = (video?.owner ?? {}) as { avatar?: { url?: string }; userName?: string; fullName?: string };
+    const [duration, setDuration] = useState<string>("00:00");
+    const [timeOfUpload, setTimeOfUpload] = useState<string>("1 day");
     const navigate = useNavigate();
 
     function handleShowUserProfile() {
@@ -101,7 +107,7 @@ export default function VideoComponent({
                         className="rounded-full h-full w-full cursor-pointer"
                         loading="lazy"
                         onClick={handleShowUserProfile}
-                        onError={(e) => (e.target.src = dpfp)}
+                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => ((e.target as HTMLImageElement).src = dpfp)}
                     />
                 </div>
                 <div className="ml-4">

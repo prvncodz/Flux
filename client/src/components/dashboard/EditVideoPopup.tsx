@@ -1,9 +1,9 @@
 
 import defaultBanner from "../assets/dbanner.jpg";
 import { useState, useRef, useContext } from "react";
-import SubmitButton from "../submitButton.jsx";
-import axios from "../../api/axios.js";
-import PopUpComponent from "../uploadPopup/popupComponent.jsx";
+import SubmitButton from "../submitButton";
+import axios from "../../api/axios";
+import PopUpComponent from "../uploadPopup/popupComponent";
 import { CameraIcon, ImageIcon } from "lucide-react";
 
 export default function EditVideoPopup({ setIsEditPopUpActive, video, setShowUpdated, setShowUpdateError }) {

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import dpfp from "../../assets/dpfp.jpg";
 import dbanner from "../../assets/dbanner.jpg";
-import PlaylistIcon from "../../assets/playlistIcon.jsx";
+import PlaylistIcon from "../../assets/playlistIcon";
 import { useNavigate } from "react-router-dom";
-import UserPlaylistcontext from "../../../contexts/userPlaylistContext.jsx";
+import UserPlaylistcontext from "../../../contexts/userPlaylistContext";
 
 export default function PlaylistComponent({
 	playlist,

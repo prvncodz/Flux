@@ -1,8 +1,13 @@
 import { create } from "zustand";
 
-const useTab = create(set => ({
+type TabState = {
+  tab: string;
+  setTab: (t: string) => void;
+};
+
+const useTab = create<TabState>((set: any) => ({
     tab: "home",
-    setTab: (tab) => set({ tab: tab }),
+    setTab: (tab: string) => set({ tab: tab }),
 }))
 
 export default useTab;

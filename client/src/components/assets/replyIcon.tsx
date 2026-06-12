@@ -1,10 +1,11 @@
+import React from "react";
 const ReplyIcon = ({
   size = 16, // default fits inline with text/counters
   color = "currentColor",
   strokeWidth = 1.6,
   title, // optional accessible title
   ...props
-}) => {
+}: { size?: number | string; color?: string; strokeWidth?: number; title?: string } & React.SVGProps<SVGSVGElement>) : React.ReactElement => {
   const ariaAttrs = title
     ? { role: "img", "aria-label": title }
     : { "aria-hidden": true };

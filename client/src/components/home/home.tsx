@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
-import Nav from "./nav.jsx";
-import Feed from "./videofeed/feed.jsx";
-import TweetFeed from "./tweetfeed/tweetFeed.jsx";
+import Nav from "./nav";
+import Feed from "./videofeed/feed";
+import TweetFeed from "./tweetfeed/tweetFeed";
 import { useLocation } from "react-router-dom";
 import { motion } from "motion/react"
 

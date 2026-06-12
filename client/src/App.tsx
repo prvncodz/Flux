@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "../components/home/home.jsx";
-const SignUp = React.lazy(() => import("../components/signup.jsx"));
-const SignIn = React.lazy(() => import("../components/signin.jsx"));
-import Profile from "../components/userProfile/profile.jsx";
-import axios from "../api/axios.js";
-import WatchVideoPage from "../components/watch/watchVideoPage.jsx";
-import WatchPostPage from "../components/watch/watchPostPage.jsx";
-import Dashboard from "../components/dashboard/dashboard.jsx";
-import LikedVideos from "../components/likedVideosPage/likedVideos.jsx";
-import HistoryPage from "../components/historyPage/historyPage.jsx";
-import WatchPlaylist from "../components/playlist/watchPlaylist.jsx";
-import SearchVideoPage from "../components/search/searchVideoPage.jsx";
-import SearchPostPage from "../components/search/searchPostPage.jsx";
-import useUserStore from "../stores/user.store.js";
+import Home from "./components/home/home";
+const SignUp = React.lazy(() => import("./components/signup"));
+const SignIn = React.lazy(() => import("./components/signin"));
+import Profile from "./components/userProfile/profile";
+import axios from "./api/axios";
+import WatchVideoPage from "./components/watch/watchVideoPage";
+import WatchPostPage from "./components/watch/watchPostPage";
+import Dashboard from "./components/dashboard/dashboard";
+import LikedVideos from "./components/likedVideosPage/likedVideos";
+import HistoryPage from "./components/historyPage/historyPage";
+import WatchPlaylist from "./components/playlist/watchPlaylist";
+import SearchVideoPage from "./components/search/searchVideoPage";
+import SearchPostPage from "./components/search/searchPostPage";
+import useUserStore from "./stores/user.store";
 
 function App() {
     const [isTokenReceived, setIsTokenReceived] = useState(false);
-    const setUser = useUserStore(s => s.setUser);
-    const setIsUserLogged = useUserStore(s => s.setIsUserLogged);
+    const setUser = useUserStore((s: any) => s.setUser);
+    const setIsUserLogged = useUserStore((s: any) => s.setIsUserLogged);
 
     useEffect(() => {
         async function loginUser() {
@@ -28,18 +28,18 @@ function App() {
                     setUser(response.data.data);
                     setIsUserLogged(true);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 setUser({});
                 setIsUserLogged(false);
                 try {
-                    if (error.status === 500) {
+                    if (error?.status === 500) {
                         const res = await axios.post("/user/refresh-tokens");
                         if (res.status == 200) {
                             setIsTokenReceived(true);
                         }
                     }
-                } catch (error) {
-                    console.log(error);
+                } catch (error2: any) {
+                    console.log(error2);
                 }
             }
         }

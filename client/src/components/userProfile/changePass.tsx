@@ -1,7 +1,7 @@
 import { useState } from "react";
-import SubmitButton from "../submitButton.jsx";
-import axios from "../../api/axios.js";
-import PopUpComponent from "../uploadPopup/popupComponent.jsx";
+import SubmitButton from "../submitButton";
+import axios from "../../api/axios";
+import PopUpComponent from "../uploadPopup/popupComponent";
 
 export default function ChangePassPopup({ setIsPassPopupActive }) {
 	const [loading, SetLoading] = useState(false);

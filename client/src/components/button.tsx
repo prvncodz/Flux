@@ -1,4 +1,5 @@
-export default function Button({ children, classes, onClick }) {
+import React from "react";
+export default function Button({ children, classes, onClick }: { children?: React.ReactNode; classes?: string; onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void; } ) {
   return (
     <button
       className={`bg-[#0A98FC] hover:bg-blue-600 

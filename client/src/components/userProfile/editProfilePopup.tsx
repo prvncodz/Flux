@@ -2,10 +2,10 @@ import defaultPfp from "../assets/dpfp.jpg";
 import defaultBanner from "../assets/dbanner.jpg";
 import editIcon from "../assets/editimage.png";
 import { useState, useRef, useContext } from "react";
-import SubmitButton from "../submitButton.jsx";
-import axios from "../../api/axios.js";
-import PopUpComponent from "../uploadPopup/popupComponent.jsx";
-import useUserStore from "../../stores/user.store.js";
+import SubmitButton from "../submitButton";
+import axios from "../../api/axios";
+import PopUpComponent from "../uploadPopup/popupComponent";
+import useUserStore from "../../stores/user.store";
 
 export default function editProfilePopup({ setIsEditPopUpActive }) {
     const [coverImagePreview, setCoverImagePreview] = useState(null);

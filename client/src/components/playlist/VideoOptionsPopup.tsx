@@ -1,16 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 
 
+import React, { useRef } from "react";
 export default function AddVideosModal({
 	isOpen,
 	onClose,
 	onAdd,
 	videos = MOCK_USER_VIDEOS,
 	alreadyAdded = ALREADY_IN_PLAYLIST,
+}: {
+	isOpen: boolean;
+	onClose: () => void;
+	onAdd?: (ids: string[]) => void;
+	videos?: any[];
+	alreadyAdded?: Set<string>;
 }) {
-	const [search, setSearch] = useState("");
-	const [selected, setSelected] = useState(new Set());
-	const searchRef = useRef(null);
+	const [search, setSearch] = React.useState<string>("");
+	const [selected, setSelected] = React.useState<Set<string>>(new Set());
+	const searchRef = useRef<HTMLInputElement | null>(null);
 
 	// Reset state when modal opens
 	useEffect(() => {

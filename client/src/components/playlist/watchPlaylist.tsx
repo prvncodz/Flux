@@ -1,28 +1,29 @@
 import { memo, useContext, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Eclipse, Ellipsis, EllipsisVertical, PlayCircleIcon, VideoIcon } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import Description from "../watch/videoDescription.jsx";
+import Description from "../watch/videoDescription";
 import dpfp from "../assets/dpfp.jpg";
 import dbanner from "../assets/dbanner.jpg"
-import PlaylistOptions from "./PlaylistOptions.jsx";
-import axios from "../../api/axios.js";
-import AddVideosModal from "./VideoOptionsPopup.jsx";
-import VideoCardOptions from "./VideoCardOptionsPopup.jsx";
-import EditPlaylistPopup from "./EditPlaylist.jsx";
-import DeletePlaylist from "./DeletePlaylist.jsx";
-import useUserStore from "../../stores/user.store.js";
+import PlaylistOptions from "./PlaylistOptions";
+import axios from "../../api/axios";
+import AddVideosModal from "./VideoOptionsPopup";
+import VideoCardOptions from "./VideoCardOptionsPopup";
+import EditPlaylistPopup from "./EditPlaylist";
+import DeletePlaylist from "./DeletePlaylist";
+import useUserStore from "../../stores/user.store";
 
+import React, { useRef } from "react";
 export default function ShowPlaylistPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const user = useUserStore(s=>s.user)
-    const { playlist, avatarUrl, fullname, username, name, owner } = location.state || {};
-    const [avatar, setAvatar] = useState(avatarUrl || null);
-    const [channelName, setChannelName] = useState(fullname || "");
-    const [userName, setUserName] = useState(username || "");
-    const [videos, setVideos] = useState(playlist?.videos || []);
-    const playPlaylist = useRef(null);
-    const [isUserPlaylistOwner, setIsUserPlaylistOwner] = useState(false);
+    const { playlist, avatarUrl, fullname, username, name, owner } = (location.state || {}) as any;
+    const [avatar, setAvatar] = React.useState<string | null>(avatarUrl || null);
+    const [channelName, setChannelName] = React.useState<string>(fullname || "");
+    const [userName, setUserName] = React.useState<string>(username || "");
+    const [videos, setVideos] = React.useState<any[]>(playlist?.videos || []);
+    const playPlaylist = useRef<any>(null);
+    const [isUserPlaylistOwner, setIsUserPlaylistOwner] = React.useState<boolean>(false);
     const [isOptionActive, setIsOptionsActive] = useState(false);
     const [isVideoOptionsActive, setIsVideoOptionsActive] = useState(false);
     const [allUserVideos, setAllUserVideos] = useState([]);

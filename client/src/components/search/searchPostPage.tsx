@@ -1,7 +1,7 @@
 import { ArrowLeft, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import TweetFeed from "../home/tweetfeed/tweetFeed.jsx";
+import TweetFeed from "../home/tweetfeed/tweetFeed";
 
 const SearchPostPage = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
