@@ -198,10 +198,10 @@ const getVideoById = asyncHandler(async (req: Request, res: Response) => {
             );
         }
     }
-    const pipeline = [
+    const video = await Video.aggregate([
         {
             $match: {
-                _id: videoId,
+                _id: new Types.ObjectId(videoId),
             },
         },
         {
@@ -267,11 +267,9 @@ const getVideoById = asyncHandler(async (req: Request, res: Response) => {
                 owner: 1,
             },
         },
-    ];
-    const video = await Video.aggregate(pipeline);
-    if (!video?.length) {
-        throw new ApiError(500, "video does'nt exists");
-    }
+    ]);
+    console.log("video:", video)
+    if (!video?.[0]) throw new ApiError(500, "video doesn't exists")
 
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     const hasViewed = await View.exists({

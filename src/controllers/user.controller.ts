@@ -94,7 +94,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     }
     const user = await User.findOne({
         $or: [{ userName }, { email }],
-    }).lean();
+    });
 
     if (!user) {
         throw new ApiError(404, "user is not registered yet");
