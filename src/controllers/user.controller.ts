@@ -114,12 +114,12 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
     const AtOptions = {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 1000, //cookie's max age is 1 hour
     };
     const RtOptions = {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         maxAge: 3 * 24 * 60 * 60 * 1000, //cookie's max age is 3 days
     };
 
@@ -189,12 +189,12 @@ const refreshAccessTokens = asyncHandler(async (req: Request, res: Response) => 
 
     const AtOptions = {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 1000, //cookie's max age is 1 hour
     };
     const RtOptions = {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         maxAge: 3 * 24 * 60 * 60 * 1000, //cookie's max age is 3 days
     };
 
