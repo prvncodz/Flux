@@ -3,6 +3,7 @@ import axios from "../api/axios";
 import SubmitButton from "./submitButton";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../stores/user.store";
+import { toast } from "sonner";
 
 export default function SignIn() {
   const [loading, SetLoading] = useState<boolean>(false);
@@ -12,7 +13,7 @@ export default function SignIn() {
   const setUser = useUserStore((s) => s.setUser);
   const setIsUserLogged = useUserStore((s) => s.setIsUserLogged);
 
-  async function handleFormSubmission(e: React.FormEvent<HTMLFormElement>) {
+  async function handleFormSubmission(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -22,6 +23,7 @@ export default function SignIn() {
       const res = await axios.post("/user/login", Data);
       if (res.status == 200) {
         navigate("/");
+        toast.success("Signed in redirecting...");
         setUser(res.data?.data?.user);
         setIsUserLogged(true);
         setIsSubmmited(true);

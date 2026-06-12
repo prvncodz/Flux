@@ -23,6 +23,7 @@ import { motion } from "motion/react"
 import useTab from "../../stores/tab.store";
 import useUserStore from "../../stores/user.store";
 import React from "react";
+import { toast } from "sonner";
 
 export default function Nav({ searchType }: { wantTabs?: boolean; searchType?: string; }) {
     const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function Nav({ searchType }: { wantTabs?: boolean; searchType?: s
     const [isMenuOpen, setIsMenuOPen] = useState<boolean>(false);
     const [signinInstruction, setSigninInstruction] = useState<boolean>(false);
     const currentPage = useTab(s => s.tab) || {}
-    
+
     const popup: Record<string, React.ReactNode> = {
         video: <VideoUploadPopup setShowPopup={setShowPopup} />,
         post: <PostUploadPopup setShowPopup={setShowPopup} />,
@@ -66,9 +67,11 @@ export default function Nav({ searchType }: { wantTabs?: boolean; searchType?: s
             const res = await axios.post("/user/logout");
 
             if (res.status == 200) {
+                toast.success("Signed out successfully");
                 setIsActive(false);
                 setNotLoggedOut(false);
                 setIsUserLogged(false);
+                window.location.href = "/"
             }
         } catch (error) {
             console.log(error);
@@ -258,7 +261,7 @@ export default function Nav({ searchType }: { wantTabs?: boolean; searchType?: s
                                                 showPopup &&
                                                 popup[
                                                 popupType
-                                                ] 
+                                                ]
                                             }
 
                                             {isUserLogged &&
@@ -387,7 +390,7 @@ export default function Nav({ searchType }: { wantTabs?: boolean; searchType?: s
                         showPopup &&
                         popup[
                         popupType
-                        ] 
+                        ]
                     }
                     {isUserLogged &&
                         notLoggedOut ? (

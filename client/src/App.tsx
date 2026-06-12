@@ -14,6 +14,7 @@ import SearchVideoPage from "./components/search/searchVideoPage";
 import SearchPostPage from "./components/search/searchPostPage";
 import useUserStore from "./stores/user.store";
 import { useGetUser } from "./hooks/useUser";
+import { Toaster } from "@/components/ui/sonner"
 
 function App() {
     const isUserLogged = useUserStore((s: any) => s.isUserLogged);
@@ -25,6 +26,8 @@ function App() {
     }, [isUserLogged]);
 
     return (
+    <>
+            <Toaster />
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Home />} />
@@ -41,6 +44,7 @@ function App() {
                 <Route path="/search/posts" element={<SearchPostPage />} />
             </Routes>
         </BrowserRouter>
+    </>
     );
 }
 

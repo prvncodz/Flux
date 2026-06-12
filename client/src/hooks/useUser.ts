@@ -5,7 +5,7 @@ import useTab from "@/stores/tab.store";
 
 export async function refreshTokens(originalReq: any) {
     try {
-        await axios.get("/users/refresh-tokens")
+        await axios.post("/user/refresh-tokens")
         return axios(originalReq)
     } catch (err) {
         useUserStore.persist.clearStorage()
