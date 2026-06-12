@@ -10,4 +10,5 @@ dbConn
 
     .catch((err) => {
         console.log(`mongodb connection failed !!!,error: ${err}`);
+        process.exit(1)
     });

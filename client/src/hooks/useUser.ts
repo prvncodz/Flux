@@ -1,6 +1,7 @@
 import useUserStore from "@/stores/user.store";
 import axios from "../api/axios";
 import useTab from "@/stores/tab.store";
+import { AxiosError } from "axios";
 
 
 export async function refreshTokens(originalReq: any) {
@@ -15,8 +16,14 @@ export async function refreshTokens(originalReq: any) {
 }
 
 export async function useGetUser() {
+    try{
     const response = await axios.get("/user/current-user")
     useUserStore.getState().setUser(response?.data?.data)
     useUserStore.getState().setIsUserLogged(true)
+    }catch(err){
+        if( err instanceof AxiosError){
+            refreshTokens(err.config)
+        }
+    }
 }
 
