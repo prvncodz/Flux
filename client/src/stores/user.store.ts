@@ -1,18 +1,27 @@
 import { User } from "@/types";
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware"
 
 interface UserState {
     user: User | null;
-    setUser: (u: User | null) => void;
+    setUser: (user: User | null) => void;
     isUserLogged: boolean;
-    setIsUserLogged: (b: boolean) => void;
+    setIsUserLogged: (bool: boolean) => void;
 };
 
-const useUserStore = create<UserState>((set: any) => ({
-    user: null,
-    setUser: (user: User | null) => set({ user: user }),
-    isUserLogged: false,
-    setIsUserLogged: (bool: boolean) => set({ isUserLogged: bool }),
-}))
+const useUserStore = create<UserState>()(
+    persist(
+        (set) => ({
+            user: null,
+            setUser: (user: User | null) => set({ user: user }),
+            isUserLogged: false,
+            setIsUserLogged: (bool: boolean) => set({ isUserLogged: bool }),
+        }),
+        {
+            name: "user-storage",
+            storage: createJSONStorage(() => localStorage)
+        }
+    )
+)
 
 export default useUserStore;
