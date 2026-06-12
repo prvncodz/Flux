@@ -162,7 +162,7 @@ const getVideoById = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.query;
 
     if (!videoId) {
-        throw new ApiError(400, "video id is invalid");
+        throw new ApiError(400, "video id is required");
     }
 
     if (req.user?._id) {
@@ -201,7 +201,7 @@ const getVideoById = asyncHandler(async (req: Request, res: Response) => {
     const video = await Video.aggregate([
         {
             $match: {
-                _id: new Types.ObjectId(videoId),
+                _id: new Types.ObjectId(videoId as string),
             },
         },
         {
